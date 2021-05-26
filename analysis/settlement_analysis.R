@@ -51,7 +51,7 @@ dev.off()
 
 # Permutation Test ----
 sites=subset(sites,!is.na(Region))
-permRes=countSitePermTest(ageRange=timeRange,ageMatrix = ageMatrix,sites=sites,ageRef=ages,nsim=100,ncores=2,backsight=200,regions=regions,raw=TRUE)
+permRes=countSitePermTest(ageRange=timeRange,ageMatrix = ageMatrix,sites=sites,ageRef=ages,nsim=500,ncores=2,backsight=200,regions=regions)
 save(permRes,file=here('R_images','permRes_settlement.RData'))
 
 ## Plot Results ---- 
@@ -61,7 +61,6 @@ par(mfrow=c(2,4),mar=c(6,5,3,1))
 
 for(i in 1:length(regions))
 {
-  plotPermResult(permRes,method=c('counts'),index=i)
-  legend('topleft',legend=c(regions[i]),bty='n',cex=1.4)
+  plotPermResult(permRes,method=c('counts'),index=i,calendar='BCAD',main=regions[i])
 }
 dev.off()

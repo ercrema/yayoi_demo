@@ -1,4 +1,4 @@
-plotPermResult = function(x,method=c('growth','counts'),index,calendar='BP')
+plotPermResult = function(x,method=c('growth','counts'),index,calendar='BP',...)
 {
   x = x[[index]]
 
@@ -70,13 +70,31 @@ plotPermResult = function(x,method=c('growth','counts'),index,calendar='BP')
    
   
   # Actual Plot ####
-  plot(0,0,type='n',xlim=rev(range(x$BP)),ylim=range(c(x$obs,x$lo,x$hi),na.rm=T),xlab='BP',ylab=ylab)
-  polygon(c(x$BP,rev(x$BP)),c(x$lo,rev(x$hi)),col='lightgrey',border=NA)
+  if(calendar=='BP')
+  {
+    trange=x$BP;
+    xlim=rev(rev(trange))
+    xlab='BP'
+  }
+  if(calendar=='BCAD')
+  {
+    trange=rcarbon::BPtoBCAD(x$BP);
+    xlim=range(trange)
+    xlab = 'BCE/CE'
+    xlab = ifelse(all(trange<0),'BCE',xlab)
+    xlab = ifelse(all(trange>0),'CE',xlab)
+  }
+  
+  # Base Plot
+  plot(0,0,type='n',xlim=xlim,ylim=range(c(x$obs,x$lo,x$hi),na.rm=T),xlab=xlab,ylab=ylab,axes=F,...)
+  #Envelope
+  polygon(c(trange,rev(trange)),c(x$lo,rev(x$hi)),col='lightgrey',border=NA)
   
   if (length(booms)>0){
     for (i in 1:length(boomBlocks)){
       bbb = unique(boomBlocks[[i]][[2]])
       index = which(x$BP%in%bbb)
+      if (calendar=='BCAD'){bbb=BPtoBCAD(bbb)}
       polygon(c(bbb,rev(bbb)),c(x$obs[index],rev(x$hi[index])),border=NA,col=rgb(0.8,0.36,0.36,0.5))
     }  
   }
@@ -85,9 +103,17 @@ plotPermResult = function(x,method=c('growth','counts'),index,calendar='BP')
     for (i in 1:length(bustBlocks)){
       bbb = unique(bustBlocks[[i]][[2]])
       index = which(x$BP%in%bbb)
+      if (calendar=='BCAD'){bbb=BPtoBCAD(bbb)}
       polygon(c(bbb,rev(bbb)),c(x$obs[index],rev(x$lo[index])),border=NA,col=rgb(0.25,0.41,0.88,0.5))
     }  
   }
-  lines(x$BP,x$obs,lwd=1.5)
+  lines(trange,x$obs,lwd=1.5)
   if(method=='growth'){abline(h=0,lty=2,col='darkgrey')}
+  
+  # Add axes
+  axis(2)
+  tt=axTicks(1)
+  if(any(tt==0)){tt[which(tt==0)]=1}
+  axis(1,at=tt,labels=abs(tt))
+  box()
 }
