@@ -3,6 +3,7 @@ library(nimbleCarbon)
 library(rcarbon)
 library(rnaturalearth)
 library(maptools)
+library(rgeos)
 library(spdep)
 library(here)
 
@@ -36,7 +37,7 @@ nbInfo <- nb2WB(W_nb)
 
 # Simulate Data (using GP) ----
 ## Generate Samples Sizes for Each Region
-avgSample = 4500
+avgSample = 1000
 nSamples <- rpois(Npref,lambda=avgSample/Npref)
 N = sum(nSamples)
 id.pref  <- rep(1:Npref,nSamples)
@@ -94,8 +95,8 @@ d$medDates  <- medCal(calibrate(d$cra,d$cra_error))
 d$thetainit  <- d$medDates
 a <- 3000
 b <- 1800
-d$thetainit[which(d$thetainit>a)]  <- a
-d$thetainit[which(d$thetainit<b)]  <- b
+d$thetainit[which(d$thetainit>=a)]  <- a - 1
+d$thetainit[which(d$thetainit<=b)]  <- b + 1
 
 
 
@@ -104,23 +105,17 @@ d$thetainit[which(d$thetainit<b)]  <- b
 icarmodel <- nimbleCode({
 	for (i in 1:N)
 	{
-		theta[i] ~ dExponentialGrowth(a=a,b=b,r=r_local[id.pref[i]])
+		theta[i] ~ dExponentialGrowth(a=a,b=b,r=s[id.pref[i]])
 		c14age[i] <- interpLin(z=theta[i], x=calBP[], y=C14BP[]);
 		sigmaCurve[i] <- interpLin(z=theta[i], x=calBP[], y=C14err[]);
 		sigmaDate[i] <- (cra_error[i]^2+sigmaCurve[i]^2)^(1/2);
 		cra[i] ~ dnorm(mean=c14age[i],sd=sigmaDate[i]);
 	}
 
-	for (i in 1:Npref)
-	{
-		r_local[i] <- r + s[i]
-	}
-
 	# ICAR Model Prior
-	s[1:Npref] ~ dcar_normal(adj[1:L], weights[1:L], num[1:Npref], tau, zero_mean = 1)
+	s[1:Npref] ~ dcar_normal(adj[1:L], weights[1:L], num[1:Npref], tau, zero_mean =0)
 	tau <- 1/sigma^2
 	sigma ~ dunif(0,100)
-	r ~ dnorm(0,sd=0.001)
 })
 
 ## Setup Constants
@@ -131,16 +126,17 @@ constants  <-  list(a=a,b=b,Npref=Npref,N=N,adj=nbInfo$adj,weights=nbInfo$weight
 data <- list(cra=d$cra,cra_error=d$cra_error) 
 
 ## Setup Init
-inits <- list(r = 0, sigma = 0.001, s = rnorm(Npref,sd=0.001),theta=d$thetainit)
+inits <- list(sigma = 0.001, s = rnorm(Npref,sd=0.001),theta=d$thetainit)
 
 
 ## Run
 model <- nimbleModel(icarmodel, constants = constants, data = data, inits = inits)
 cModel <- compileNimble(model)
-conf <- configureMCMC(model, monitors = c('r', 's','sigma','r_local'))
+conf <- configureMCMC(model, monitors = c('s','sigma'))
 conf$printSamplers()
 MCMC <- buildMCMC(conf)
 cMCMC <- compileNimble(MCMC, project = cModel)
 samples <- runMCMC(cMCMC, niter = 10000, nburnin = 5000, thin = 1)
 samples.mu <- apply(samples,2,median)
-plot(simModel$local_r,samples.mu[2:46])
+plot(simModel$local_r,samples.mu[1:45])
+abline(a=0,b=1)
