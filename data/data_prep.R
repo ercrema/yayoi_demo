@@ -13,4 +13,8 @@ load(here('data','japanc14db_v03.3(210218).RData')) #version 3.0
 c14db = subset(c14db,retain==TRUE)
 # Add Booleans fields
 c14db$anthropic = grepl(paste(anthropicGrep,collapse="|"),c14db$SamplingLocation) #sum(c14db$anthropic) 10683
+# Add SiteID based on DBSCAN
+source(here('R','dbscanID.R'))
+c14db$SiteID=dbscanID(sitename=c14db$SiteName,longitude = c14db$Longitude,latitude = c14db$Latitude,eps=0.1)
+
 save(c14db,file=here('data','c14data.RData'))
