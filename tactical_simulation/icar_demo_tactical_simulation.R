@@ -1,4 +1,5 @@
 library(ggplot2)
+library(gridExtra)
 library(nimbleCarbon)
 library(rcarbon)
 library(rnaturalearth)
@@ -72,13 +73,13 @@ spatial_demo  <- nimbleCode({
 
 ### Parameters
 etasq <-0.00001
-rhosq <- 0.00006
+rhosq <- 0.00007
 r <- 0.004
 curve(etasq * exp(-rhosq * x^2), from = 0, to = 200)
 
 
 ### Actual Simulation
-set.seed(1234)
+set.seed(12345)
 simModel <- nimbleModel(code = spatial_demo,constants = list(start=3000,end=1800,N = N,dmat = distMatrix,etasq=etasq,rhosq=rhosq,r=r,Npref=Npref,id.pref=id.pref))
 simModel$simulate('s')
 simModel$simulate('local_r')
@@ -140,3 +141,10 @@ samples <- runMCMC(cMCMC, niter = 10000, nburnin = 5000, thin = 1)
 samples.mu <- apply(samples,2,median)
 plot(simModel$local_r,samples.mu[1:45])
 abline(a=0,b=1)
+
+
+win.sf$pred_r = samples.mu[1:45]
+g1 <- ggplot(win.sf,aes(fill=r))  + geom_sf() + scale_fill_gradient2() + ggtitle('Simulated Growth Rates')
+g2 <- ggplot(win.sf,aes(fill=pred_r))  + geom_sf() + scale_fill_gradient2() + ggtitle('Predicted Growth Rates')
+grid.arrange(g1,g2,ncol=2)
+
