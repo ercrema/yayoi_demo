@@ -11,13 +11,6 @@ QSR? JAS? Scientific Reports? Nature Comms?
 * C14Db intro and spatial demography
 * Limitations of existing approaches based on SPDs
 * Discuss the issue of spatial averaging and non-stationarity
-* Introduce Gaussian Process Regression
-* Possible Nonstationary Gaussian Process Regression (NGPR - see [here](https://cran.r-project.org/web/packages/BayesNSGP/index.html)
-* Simulation study (supplementary materials)
+* Conditional Autoregressive Model with prefectures as spatial units (maybe)
+* Hierarchichal Model with Regional Exponential model and offset timewindow between estimated start of farming and 500/1000 yrs.
 
-## Current Status
-- [] Explore GP model with exponential growth
-- [] Explore NSGP model with exponential growth
-- [] Setup main pipeline for analysis on observed data
-- [] Consider split into two periods?
-- [] Basic graphs
