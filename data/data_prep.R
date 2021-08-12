@@ -1,20 +1,24 @@
 library(here)
 library(rcarbon)
 
-# General Settings and Parameters:
-anthropicGrep = c("住居","埋葬","竪穴建物","掘立柱","墓","包含層","土坑","ピット","土器","捨場","遺構","炉","人骨","木舟","住","柱","Pit","焼土","カマド","床面","溝中","溝底部","建物跡","木製品","埋土","水田","竪坑","羨道","集石","漆器")
-
-
 # Read 14C Data ----
 load(here('data','japanc14db_v03.3(210218).RData')) #version 3.0
 
-# Cleaning ----
+# Preprocessing ----
 # Consider only dates with Retain=TRUE
-c14db = subset(c14db,retain==TRUE)
+c14db = subset(c14db,retain==TRUE,!Region %in% c('Hokkaido','Okinawa'))
 # Add Booleans fields
+anthropicGrep = c("住居","埋葬","竪穴建物","掘立柱","墓","包含層","土坑","ピット","土器","捨場","遺構","炉","人骨","木舟","住","柱","Pit","焼土","カマド","床面","溝中","溝底部","建物跡","木製品","埋土","水田","竪坑","羨道","集石","漆器")
 c14db$anthropic = grepl(paste(anthropicGrep,collapse="|"),c14db$SamplingLocation) #sum(c14db$anthropic) 10683
 # Add SiteID based on DBSCAN
 source(here('R','dbscanID.R'))
 c14db$SiteID=dbscanID(sitename=c14db$SiteName,longitude = c14db$Longitude,latitude = c14db$Latitude,eps=0.1)
+# Add Region ID
+c14db$RegionID <- as.numeric(factor(c14db$Region, levels = c("Kyushu", "Chugoku","Shikoku", "Kansai", "Chubu", "Kanto", "Tohoku")))
+c14db$Region2 <- c14db$Region
+c14db$Region2[c14db$Region2 %in% c("Shikoku","Chugoku")] = "Chugoku-Shikoku"
+c14db$RegionID2 <- as.numeric(factor(c14db$Region2, levels = c("Kyushu", "Chugoku-Shikoku", "Kansai", "Chubu", "Kanto", "Tohoku"),
+ordered = T))
+
 
 save(c14db,file=here('data','c14data.RData'))
