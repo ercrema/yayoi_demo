@@ -60,7 +60,7 @@ const500$ends <- regionStartDates$b500
 const1000$ends <- regionStartDates$b1000
 
 # Data
-d500 <- list(cra=c14db500$C14Age,cra_error=c14db1000$C14Error)
+d500 <- list(cra=c14db500$C14Age,cra_error=c14db500$C14Error)
 d1000 <- list(cra=c14db1000$C14Age,cra_error=c14db1000$C14Error)
 
 # Define Sensible initialisation values for theta ----
@@ -74,6 +74,25 @@ c14db1000$theta.init[which(c14db1000$theta.init>=c14db1000$a)]  <- c14db1000$a[w
 c14db1000$theta.init[which(c14db1000$theta.init<=c14db1000$b1000)] <- c14db1000$b[which(c14db1000$theta.init<=c14db1000$b1000)] + 1
 theta.init.500 <- c14db500$theta.init
 theta.init.1000  <- c14db1000$theta.init
+
+# Sanity Check Plot
+# spd.500 <- spd.10:0 <- vector('list',length=nrow(regionStartDates))
+# for (i in 1:nrow(regionStartDates))
+# {
+# 	ii <- which(c14db500$RegionID==i)
+# 	cal.500 <- calibrate(c14db500$C14Age[ii],c14db500$C14Error[ii],normalised=F)
+# 	spd.500[[i]] <- spd(cal.500,timeRange=c(regionStartDates$a[i],regionStartDates$b500[i]))
+# 
+# 	ii <- which(c14db1000$RegionID==i)
+# 	cal.1000 <- calibrate(c14db1000$C14Age[ii],c14db1000$C14Error[ii],normalised=F)
+# 	spd.1000[[i]] <- spd(cal.1000,timeRange=c(regionStartDates$a[i],regionStartDates$b1000[i]))
+# }
+# 
+# par(mfrow=c(3,3))
+# lapply(spd.1000,plot)
+# lapply(spd.500,plot)
+
+
 
 # Core Bayesian Analysis ----
 
