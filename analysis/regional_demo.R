@@ -11,15 +11,15 @@ c14db = subset(c14db,C14Age<4000 & C14Age> 300 &  Material == 'Terrestrial') |> 
 
 # Site Level Thinning ----
 calibrated.dates <- calibrate(c14db$C14Age,c14db$C14Error)
-bin100  <- binPrep(sites = c14db$SiteID,ages=calibrated.dates,h=100)
-i  <- thinDates(ages=c14db$C14Age,  errors=c14db$C14Error, bins=bin100, size=1, thresh=1,seed=123,method='splitsample')
+bin50  <- binPrep(sites = c14db$SiteID,ages=calibrated.dates,h=50)
+i  <- thinDates(ages=c14db$C14Age,  errors=c14db$C14Error, bins=bin50, size=1, thresh=1,seed=123,method='splitsample')
 c14db  <-  c14db[i,]
 calibrated.dates <- calibrated.dates[i]
 
 # Setup Regions ----
 regionStartDates = unique(select(c14db,Region,RegionID)) |> arrange(RegionID)
 # regionStartDates$a = 3000
-regionStartDates$a = BCADtoBP(c(-990,-890,-790,-650,-500,-480,-250))
+regionStartDates$a = BCADtoBP(c(-1240,-1088,-960,-804,-665,-520,-381)) # 1240, 1088, 960, 804, 665, 520, 381
 regionStartDates$b500 = regionStartDates$a - 500
 regionStartDates$b1000 = regionStartDates$a - 1000
 
@@ -76,21 +76,20 @@ theta.init.500 <- c14db500$theta.init
 theta.init.1000  <- c14db1000$theta.init
 
 # Sanity Check Plot
-# spd.500 <- spd.10:0 <- vector('list',length=nrow(regionStartDates))
-# for (i in 1:nrow(regionStartDates))
-# {
-# 	ii <- which(c14db500$RegionID==i)
-# 	cal.500 <- calibrate(c14db500$C14Age[ii],c14db500$C14Error[ii],normalised=F)
-# 	spd.500[[i]] <- spd(cal.500,timeRange=c(regionStartDates$a[i],regionStartDates$b500[i]))
-# 
-# 	ii <- which(c14db1000$RegionID==i)
-# 	cal.1000 <- calibrate(c14db1000$C14Age[ii],c14db1000$C14Error[ii],normalised=F)
-# 	spd.1000[[i]] <- spd(cal.1000,timeRange=c(regionStartDates$a[i],regionStartDates$b1000[i]))
-# }
-# 
-# par(mfrow=c(3,3))
-# lapply(spd.1000,plot)
-# lapply(spd.500,plot)
+ spd.500 <- spd.1000 <- vector('list',length=nrow(regionStartDates))
+ for (i in 1:nrow(regionStartDates))
+ {
+ 	ii <- which(c14db500$RegionID==i)
+ 	cal.500 <- calibrate(c14db500$C14Age[ii],c14db500$C14Error[ii],normalised=F)
+ 	spd.500[[i]] <- spd(cal.500,timeRange=c(regionStartDates$a[i],regionStartDates$b500[i]))
+ 
+ 	ii <- which(c14db1000$RegionID==i)
+ 	cal.1000 <- calibrate(c14db1000$C14Age[ii],c14db1000$C14Error[ii],normalised=F)
+ 	spd.1000[[i]] <- spd(cal.1000,timeRange=c(regionStartDates$a[i],regionStartDates$b1000[i]))
+ }
+ 
+ par(mfrow=c(3,3))
+ lapply(spd.1000,plot)
 
 
 
@@ -144,9 +143,9 @@ runFun <- function(seed, d, constants, theta.init, nburnin, niter, thin)
 # Run MCMC ----
 ncores  <-  3
 cl <- makeCluster(ncores)
-seeds  <-  c(123,456)
-niter  <- 10000
-nburnin  <- 5000
+seeds  <-  c(123,456,789)
+niter  <- 20000
+nburnin  <- 10000
 thin  <- 1
 
 chain_output_500 = parLapply(cl = cl, X = seeds, fun = runFun, d = d500,constants = const500, theta = theta.init.500, niter = niter, nburnin = nburnin,thin = thin)
@@ -154,8 +153,8 @@ chain_output_1000 = parLapply(cl = cl, X = seeds, fun = runFun, d = d1000,consta
 stopCluster(cl)
 post.sample500=coda::mcmc.list(chain_output_500)
 post.sample1000=coda::mcmc.list(chain_output_1000)
-# coda::gelman.diag(post.sample500)
-# coda::gelman.diag(post.sample1000)
+coda::gelman.diag(post.sample500)
+coda::gelman.diag(post.sample1000)
 
 save(post.sample500,file=here('R_images','regdemo500.RData'))
 save(post.sample1000,file=here('R_images','regdemo1000.RData'))
