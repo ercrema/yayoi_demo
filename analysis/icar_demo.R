@@ -28,8 +28,8 @@ c14db <- c14db[i,]
 calibrated.dates <- calibrated.dates[i]
 
 # Site Level Thinning
-bin100  <- binPrep(sites = c14db$SiteID,ages=calibrated.dates,h=100)
-i  <- thinDates(ages=c14db$C14Age,  errors=c14db$C14Error, bins=bin100, size=1, thresh=1,seed=123,method='splitsample')
+bin50  <- binPrep(sites = c14db$SiteID,ages=calibrated.dates,h=50)
+i  <- thinDates(ages=c14db$C14Age,  errors=c14db$C14Error, bins=bin50, size=1, thresh=1,seed=123,method='splitsample')
 c14db  <-  c14db[i,]
 calibrated.dates <- calibrated.dates[i]
 
@@ -114,10 +114,10 @@ runFun <- function(seed, d, constants, theta.init, nburnin, niter, thin)
 # Run MCMC ----
 ncores  <-  3
 cl <- makeCluster(ncores)
-seeds  <-  c(123,456)
-niter  <- 20000
-nburnin  <- 10000
-thin  <- 1
+seeds  <-  c(123,456,789)
+niter  <- 120000
+nburnin  <- 60000
+thin  <- 6
 
 chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = constants, theta = theta.init, niter = niter, nburnin = nburnin,thin = thin)
 
