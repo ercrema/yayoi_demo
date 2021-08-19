@@ -19,7 +19,7 @@ calibrated.dates <- calibrated.dates[i]
 # Setup Regions ----
 regionStartDates = unique(select(c14db,Region,RegionID)) |> arrange(RegionID)
 # regionStartDates$a = 3000
-regionStartDates$a = BCADtoBP(c(-1240,-1088,-960,-804,-665,-520,-381)) # 1240, 1088, 960, 804, 665, 520, 381
+regionStartDates$a = BCADtoBP(c(-1283,-1117,-981,-833,-685,-515,-362)) # 1283, 1117, 981, 833, 685, 515, 362
 regionStartDates$b500 = regionStartDates$a - 500
 regionStartDates$b1000 = regionStartDates$a - 1000
 
