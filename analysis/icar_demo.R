@@ -12,14 +12,14 @@ library(here)
 library(parallel)
 
 # Time window of analyses ----
-a <- 3000
-b <- 1700
+a <- BCADtoBP(-900)
+b <- BCADtoBP(250)
 
 
 # Load and prepare 14C and Spatial Data ----
 # Load Data
 load(here('data','c14data.RData'))
-c14db = subset(c14db,C14Age<4000 & C14Age> 300 &  Material == 'Terrestrial' & !PrefectureNameEn %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,SiteID,Prefecture=PrefectureNameEn,Longitude,Latitude)
+c14db = subset(c14db,C14Age<4000 & C14Age> 300 &  anthropic == TRUE & Material == 'Terrestrial' & !PrefectureNameEn %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,SiteID,Prefecture=PrefectureNameEn,Longitude,Latitude)
 
 # Consider dates with probability mass above 0.5 within window of analyses
 calibrated.dates <- calibrate(c14db$C14Age,c14db$C14Error)
