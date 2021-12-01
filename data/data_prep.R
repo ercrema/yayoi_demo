@@ -2,7 +2,7 @@ library(here)
 library(rcarbon)
 
 # Read 14C Data ----
-load(here('data','japanc14db_v04.1(210715).RData'))
+load(here('data','japanc14db_v04.2(210715).RData'))
 
 # Preprocessing ----
 # Consider only dates with Retain=TRUE
