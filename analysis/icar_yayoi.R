@@ -12,8 +12,8 @@ library(here)
 library(parallel)
 
 # Time window of analyses ----
-a <- 3899 #BC1950
-b <- 2899 #BC950
+a <- 2899 #950BC
+b <- 1700 #250AD
 
 
 # Load and prepare 14C and Spatial Data ----

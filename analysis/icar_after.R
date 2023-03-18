@@ -11,32 +11,42 @@ library(spdep)
 library(here)
 library(parallel)
 
-# Time window of analyses ----
-a <- 3899 #BC1950
-b <- 2899 #BC950
-
-
 # Load and prepare 14C and Spatial Data ----
-# Load Data
 load(here('data','c14data.RData'))
-c14db = subset(c14db,C14Age< (a+500) & C14Age> (b-500) &  Material == 'Terrestrial' & !PrefectureNameEn %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,SiteID,Prefecture=PrefectureNameEn,Longitude,Latitude)
+timespan  <- 1000
+c14db$fromFarming  <- c14db$ricearrival - c14db$C14Age
+c14db$a = c14db$ricearrival
+c14db$b = c14db$ricearrival - timespan
+c14db = subset(c14db,fromFarming > -500 & fromFarming < (timespan+500) & Material == 'Terrestrial' & !PrefectureNameEn %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,a,b,SiteID,Prefecture=PrefectureNameEn,Longitude,Latitude,RiceRegion)
 
-# Consider dates with probability mass above 0.5 within window of analyses
-calibrated.dates <- calibrate(c14db$C14Age,c14db$C14Error)
-i <- which.CalDates(calibrated.dates,BP<a&BP>b,p=0.5)
-c14db <- c14db[i,]
-calibrated.dates <- calibrated.dates[i]
+regions  <- c('I','II','III','IV','V','VI','VII','VIII')
+regionList  <- vector('list',length=length(regions))
+for (i in 1:length(regions))
+{
+	tmp.subset  <- subset(c14db,RiceRegion==regions[i])
+	tmp.cal  <- calibrate(tmp.subset$C14Age,tmp.subset$C14Error)
+	tmp.subset$medCal  <- medCal(tmp.cal)
+	tmp.subset$include  <- FALSE
+	a  <-  tmp.subset$a[1]
+	b  <- tmp.subset$b[1]
+	tmp.subset$include[which.CalDates(tmp.cal,BP<a&BP>b,p=0.5)]  <- TRUE
+	regionList[[i]]  <- tmp.subset
+}
 
+c14db  <- do.call(rbind.data.frame,regionList) |> subset(x=_,include==TRUE)
+calibrated.dates  <- calibrate(c14db$C14Age,c14db$C14Error)
 # Site Level Thinning
 bin50  <- binPrep(sites = c14db$SiteID,ages=calibrated.dates,h=50)
 i  <- thinDates(ages=c14db$C14Age,  errors=c14db$C14Error, bins=bin50, size=1, thresh=1,seed=123,method='splitsample')
 c14db  <-  c14db[i,]
-calibrated.dates <- calibrated.dates[i]
 
 # Define initialisation values for theta
-theta.init <- medCal(calibrated.dates)
-theta.init[which(theta.init>=a)] = a - 1
-theta.init[which(theta.init<=b)] = b + 1
+c14db$theta <- c14db$medCal
+c14db$theta  <- ifelse(c14db$theta>=c14db$a,c14db$a-1,c14db$theta)
+c14db$theta  <- ifelse(c14db$theta<=c14db$b,c14db$b+1,c14db$theta)
+# any(c14db$theta>c14db$a)
+# any(c14db$theta<c14db$b)
+theta.init <- c14db$theta
 
 # Define total number of dates
 N <- nrow(c14db)
@@ -70,8 +80,8 @@ d <- list(cra=c14db$C14Age,cra_error=c14db$C14Error)
 # Define Constants
 data(intcal20)
 constants  <-  list(Npref=Npref,N=N,adj=nbInfo$adj,weights=nbInfo$weights,num=nbInfo$num,L=length(nbInfo$adj),calBP=intcal20$CalBP,C14BP=intcal20$C14Age,C14err=intcal20$C14Age.sigma)
-constants$a <- a
-constants$b <- b
+constants$a <- c14db$a
+constants$b <- c14db$b
 constants$id.pref <-c14db$PrefID
 
 
@@ -85,7 +95,7 @@ runFun <- function(seed, d, constants, theta.init, nburnin, niter, thin)
 	icarmodel <- nimbleCode({
 		for (i in 1:N)
 		{
-			theta[i] ~ dExponentialGrowth(a=a,b=b,r=s[id.pref[i]])
+			theta[i] ~ dExponentialGrowth(a=a[i],b=b[i],r=s[id.pref[i]])
 			c14age[i] <- interpLin(z=theta[i], x=calBP[], y=C14BP[]);
 			sigmaCurve[i] <- interpLin(z=theta[i], x=calBP[], y=C14err[]);
 			sigmaDate[i] <- (cra_error[i]^2+sigmaCurve[i]^2)^(1/2);
@@ -124,7 +134,7 @@ chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = c
 stopCluster(cl)
 icar.samples=coda::mcmc.list(chain_output)
 coda::gelman.diag(icar.samples)
-save(icar.samples,file=here('results','icar_finaljomon.RData'))
+save(icar.samples,file=here('results','icar_after.RData'))
 
 # samples.m <- apply(icar.samples[[1]],2,median)
 # samples.lo <- apply(icar.samples[[1]],2,quantile,0.025)
