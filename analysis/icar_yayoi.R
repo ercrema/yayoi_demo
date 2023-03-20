@@ -12,7 +12,7 @@ library(here)
 library(parallel)
 
 # Time window of analyses ----
-a <- 2899 #950BC
+a <- 3000 #950BC
 b <- 1700 #250AD
 
 
@@ -113,32 +113,16 @@ runFun <- function(seed, d, constants, theta.init, nburnin, niter, thin)
 }
 
 # Run MCMC ----
-ncores  <-  3
+ncores  <-  4
 cl <- makeCluster(ncores)
-seeds  <-  c(123,456,789)
+seeds  <-  c(12,34,56,78)
 niter  <- 250000
 nburnin  <- 125000
 thin  <- 5
 
 chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = constants, theta = theta.init, niter = niter, nburnin = nburnin,thin = thin)
 stopCluster(cl)
-icar.samples=coda::mcmc.list(chain_output)
-coda::gelman.diag(icar.samples)
-save(icar.samples,file=here('results','icar_finaljomon.RData'))
-
-# samples.m <- apply(icar.samples[[1]],2,median)
-# samples.lo <- apply(icar.samples[[1]],2,quantile,0.025)
-# samples.hi <- apply(icar.samples[[1]],2,quantile,0.975)
-# 
-# win.sf <- as(win,'sf')
-# win.sf$pred_r_m = samples.m[1:45]
-# win.sf$pred_r_lo = samples.lo[1:45]
-# win.sf$pred_r_hi = samples.hi[1:45]
-# library(gridExtra)
-# g1<-ggplot(win.sf,aes(fill=pred_r_m))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# g2<-ggplot(win.sf,aes(fill=pred_r_lo))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# g3<-ggplot(win.sf,aes(fill=pred_r_hi))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# 
-# lay <- rbind(c(1,1,2),c(1,1,3))
-# grid.arrange(g1,g2,g3,layout_matrix=lay)
-
+icar.samples  <- coda::mcmc.list(chain_output)
+rhats.yayoi  <- coda::gelman.diag(icar.samples)
+icar.yayoi  <- do.call(rbind.data.frame,icar.samples)
+save(rhats.yayoi,icar.yayoi,file=here('results','icar_yayoi.RData'))

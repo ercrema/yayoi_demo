@@ -123,9 +123,9 @@ runFun <- function(seed, d, constants, theta.init, nburnin, niter, thin)
 }
 
 # Run MCMC ----
-ncores  <-  3
+ncores  <-  4
 cl <- makeCluster(ncores)
-seeds  <-  c(123,456,789)
+seeds  <-  c(12,34,56,78)
 niter  <- 250000
 nburnin  <- 125000
 thin  <- 5
