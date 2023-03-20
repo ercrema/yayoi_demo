@@ -13,7 +13,7 @@ library(parallel)
 
 # Load and prepare 14C and Spatial Data ----
 load(here('data','c14data.RData'))
-timespan  <- 1000
+timespan  <- 500
 c14db$fromFarming  <- c14db$ricearrival - c14db$C14Age
 c14db$a = c14db$ricearrival
 c14db$b = c14db$ricearrival - timespan
@@ -132,23 +132,7 @@ thin  <- 5
 
 chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = constants, theta = theta.init, niter = niter, nburnin = nburnin,thin = thin)
 stopCluster(cl)
-icar.samples=coda::mcmc.list(chain_output)
-coda::gelman.diag(icar.samples)
-save(icar.samples,file=here('results','icar_after.RData'))
-
-# samples.m <- apply(icar.samples[[1]],2,median)
-# samples.lo <- apply(icar.samples[[1]],2,quantile,0.025)
-# samples.hi <- apply(icar.samples[[1]],2,quantile,0.975)
-# 
-# win.sf <- as(win,'sf')
-# win.sf$pred_r_m = samples.m[1:45]
-# win.sf$pred_r_lo = samples.lo[1:45]
-# win.sf$pred_r_hi = samples.hi[1:45]
-# library(gridExtra)
-# g1<-ggplot(win.sf,aes(fill=pred_r_m))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# g2<-ggplot(win.sf,aes(fill=pred_r_lo))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# g3<-ggplot(win.sf,aes(fill=pred_r_hi))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# 
-# lay <- rbind(c(1,1,2),c(1,1,3))
-# grid.arrange(g1,g2,g3,layout_matrix=lay)
-
+icar.samples <- coda::mcmc.list(chain_output)
+rhats.after500  <- coda::gelman.diag(icar.samples)
+icar.after500  <- do.call(rbind.data.frame,icar.samples)
+save(rhats.after500,icar.after500,file=here('results','icar_after500.RData'))
