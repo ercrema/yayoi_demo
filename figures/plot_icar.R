@@ -19,6 +19,7 @@ load(here('results','icar_finaljomon.RData'))
 load(here('results','icar_yayoi.RData'))
 load(here('results','icar_before.RData'))
 load(here('results','icar_after.RData'))
+load(here('results','icar_after500.RData'))
 
 # Extract summaries
 finaljomon.m <- apply(icar.finaljomon,2,median) * 100
@@ -37,7 +38,11 @@ after.m <- apply(icar.after,2,median) * 100
 after.lo <- apply(icar.after,2,quantile,0.1) * 100
 after.hi <- apply(icar.after,2,quantile,0.9) * 100
 
-limits  <- c(min(c(after.lo,finaljomon.lo)),max(c(after.hi,finaljomon.hi)))
+after500.m <- apply(icar.after500,2,median) * 100
+after500.lo <- apply(icar.after500,2,quantile,0.1) * 100
+after500.hi <- apply(icar.after500,2,quantile,0.9) * 100
+
+limits  <- c(min(c(after.lo,after500.lo,finaljomon.lo,before.lo,yayoi.lo)),max(c(after.hi,after500.hi,finaljomon.hi,yayoi.hi,before.hi)))
 
 
 # Load Base Map ----
@@ -346,5 +351,59 @@ g.after.map <-ggplot(win.sf,aes(fill=pred_r_m)) +
 	       theme(legend.position = c(0.8, 0.2), plot.title=element_text(size=20)) 
 pdf(here('figures','icarafter2.pdf'),width=10,height=7)
 grid.arrange(g.after.map,g.after.bars,ncol=2)
+dev.off()
+
+
+
+# After (500) Results ----
+win.sf$pred_r_m = after500.m[1:45]
+win.sf$pred_r_lo = after500.lo[1:45]
+win.sf$pred_r_hi = after500.hi[1:45]
+
+g1<-ggplot(win.sf,aes(fill=pred_r_m))  + geom_sf() + scale_fill_gradient2(limits=limits)  + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42) + labs(fill='Percentage \n Growth Rate') + ggtitle('Median Posterior Growth Rate \n 500yrs after rice arrival') + theme(legend.position = c(0.8, 0.2), plot.title=element_text(vjust=-15,hjust=0.1,size=20)) 
+g2<-ggplot(win.sf,aes(fill=pred_r_lo))  + geom_sf() + scale_fill_gradient2(limits=limits) + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42) + ggtitle('10th Posterior \nPercentile') + theme(legend.position = "none",plot.title=element_text(vjust=-12,hjust=0.1))
+g3<-ggplot(win.sf,aes(fill=pred_r_hi))  + geom_sf() + scale_fill_gradient2(limits=limits) + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42) + ggtitle('90th Posterior \nPercentile') + theme(legend.position = "none",plot.title=element_text(vjust=-12,hjust=0.1))
+
+lay <- rbind(c(1,1,2),c(1,1,3))
+pdf(here('figures','icarafter500.pdf'),width=9,height=8)
+grid.arrange(grobs=list(g1,g2,g3),layout_matrix=lay)
+dev.off()
+
+
+# Comparative Plot
+icar.af  <- icar.after500[,1:45]
+colnames(icar.af)  <- unlist(lapply(strsplit(win.sf$name_en," "),function(x){x[1]}))
+ii  <- order(win.sf$latitude)
+icar.af  <- icar.af[,ii]
+after500  <- gather(icar.af)
+after500$key  <- factor(after500$key,levels=colnames(icar.af))
+after500$value  <-  after500$value * 100
+
+after5002  <- after500
+after5002$value  <- after5002$value + 0.01
+
+
+g.after500.bars <- ggplot(aes(y = key, x = value),data=after500) + 
+	     	 stat_interval(aes(y = key), .width = c(.5, .8, .95)) +
+# 	         stat_interval(aes(y = key), .width = c(.5, .8, .95),data=after5002, position=position_nudge(y = -0.5)) +
+	         scale_color_brewer() +
+	         ylab('')   +
+	         xlab('Growth Rate (%)') +
+#  	         ggtitle('Estimated Growth Rate (2000-1000 BC)') +
+	         theme(legend.position=c(0.9,0.5)) +
+	         geom_vline(xintercept=0, linetype='dashed')
+
+g.after500.map <-ggplot(win.sf,aes(fill=pred_r_m)) + 
+	       geom_sf() + 
+	       scale_fill_gradient2(limits=limits) +
+	       xlab("Longitude") +
+	       ylab("Latitude") +
+	       xlim(130,142) +
+	       ylim(29,42) +
+	       labs(fill='Percentage \n Growth Rate') +
+	       ggtitle('Median Posterior Growth Rate \n 500 years from arrival Farming') +
+	       theme(legend.position = c(0.8, 0.2), plot.title=element_text(size=20)) 
+pdf(here('figures','icarafter5002.pdf'),width=10,height=7)
+grid.arrange(g.after500.map,g.after500.bars,ncol=2)
 dev.off()
 
