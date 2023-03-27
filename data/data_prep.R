@@ -85,4 +85,4 @@ nbInfo.rice <- nb2WB(W_nb.rice)
 
 # Store everything in a R image file ----
 
-save(c14db,W_nb,nbInfo,W_nb.rice,nbInfo.rice,file=here('data','c14data.RData'))
+save(c14db,win,win.riceregion,Npref,Nregions,W_nb,nbInfo,W_nb.rice,nbInfo.rice,file=here('data','c14data.RData'))
