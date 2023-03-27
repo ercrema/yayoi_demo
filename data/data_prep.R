@@ -1,5 +1,10 @@
 library(here)
 library(rcarbon)
+library(rnaturalearth)
+library(sf)
+library(maptools)
+library(rgeos)
+library(spdep)
 source(here('src','dbscanID.R'))
 
 # Read 14C Data ----
@@ -53,4 +58,31 @@ c14db$C14Error[i] = c14db$CRAError[i]
 
 c14db  <- subset(c14db,!is.na(C14Age) & !is.na(C14Error))
 
-save(c14db,file=here('data','c14data.RData'))
+# Spatial Data -----
+# Prefecture Based
+win <- ne_states(country = "japan",returnclass = 'sf') |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
+Npref <- nrow(win)
+win$ID  <-  1:Npref
+W_nb <- poly2nb(win, row.names =  win$ID)
+nbInfo <- nb2WB(W_nb)
+
+# RiceRegion Based
+win$riceregion <- NA
+win$riceregion[which(win$name%in%c('Fukuoka','Saga','Nagasaki'))]  <- "I"
+win$riceregion[which(win$name%in%c('Oita','Miyazaki','Kagoshima','Kumamoto'))]  <- "II"
+win$riceregion[which(win$name%in%c('Ehime','Kochi')|win$region=='Chugoku')]  <- "III"
+win$riceregion[which(win$name%in%c('Kagawa','Tokushima')|win$region=='Kinki')]  <- 'IV'
+win$riceregion[which(win$name%in%c('Kanagawa')|win$region=='Chubu')]  <- "V"
+win$riceregion[which(win$name%in%c('Saitama','Gunma','Tokyo','Chiba','Tochigi','Ibaraki'))]  <- "VI"
+win$riceregion[which(win$name%in%c('Yamagata','Fukushima','Miyagi','Iwate','Akita'))]  <- "VII"
+win$riceregion[which(win$name%in%c('Aomori'))]  <- "VIII"
+win.riceregion  <- group_by(win,riceregion) |> summarise()
+
+Nregions  <- nrow(win.riceregion)
+win.riceregion$ID  <- 1:Nregions
+W_nb.rice <- poly2nb(win.riceregion, row.names =  win.riceregion$ID)
+nbInfo.rice <- nb2WB(W_nb.rice)
+
+# Store everything in a R image file ----
+
+save(c14db,W_nb,nbInfo,W_nb.rice,nbInfo.rice,file=here('data','c14data.RData'))
