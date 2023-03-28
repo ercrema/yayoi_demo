@@ -52,16 +52,16 @@ theta.init <- c14db$theta
 N <- nrow(c14db)
 
 # Define Spatial Structure
-win <- ne_states(country = "japan") |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
+# win <- ne_states(country = "japan") |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
 # sites <- select(c14db,SiteID,Longitude,Latitude)
 # coordinates(sites) <- c('Longitude','Latitude')
 # proj4string(sites) <- proj4string(win)
 # sites.sf <- as(sites,'sf')
 
 # Create Prefecture ID and add to c14db
-Npref <- length(win)
-win@data$ID = 1:Npref
-c14db$PrefID = match(c14db$Prefecture,win@data$name)
+# Npref <- length(win)
+# win@data$ID = 1:Npref
+c14db$PrefID = match(c14db$Prefecture,win$name)
 sort(table(c14db$PrefID))
 
 # Test Plot
@@ -69,9 +69,9 @@ sort(table(c14db$PrefID))
 # ggplot(data=win.sf) +  geom_sf() + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42) + geom_sf(data = sites.sf,shape=20,size=0.5)
 
 # Define Neighbourhood Structure
-W_nb <- poly2nb(win, row.names =  win@data$ID)
+# W_nb <- poly2nb(win, row.names =  win@data$ID)
 # Determine neighborhood/adjacency information needed for neighborhood-based CAR model
-nbInfo <- nb2WB(W_nb)
+# nbInfo <- nb2WB(W_nb)
 
 # Define Data
 d <- list(cra=c14db$C14Age,cra_error=c14db$C14Error)
@@ -132,23 +132,8 @@ thin  <- 5
 
 chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = constants, theta = theta.init, niter = niter, nburnin = nburnin,thin = thin)
 stopCluster(cl)
-icar.samples=coda::mcmc.list(chain_output)
-coda::gelman.diag(icar.samples)
-save(icar.samples,file=here('results','icar_after.RData'))
-
-# samples.m <- apply(icar.samples[[1]],2,median)
-# samples.lo <- apply(icar.samples[[1]],2,quantile,0.025)
-# samples.hi <- apply(icar.samples[[1]],2,quantile,0.975)
-# 
-# win.sf <- as(win,'sf')
-# win.sf$pred_r_m = samples.m[1:45]
-# win.sf$pred_r_lo = samples.lo[1:45]
-# win.sf$pred_r_hi = samples.hi[1:45]
-# library(gridExtra)
-# g1<-ggplot(win.sf,aes(fill=pred_r_m))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# g2<-ggplot(win.sf,aes(fill=pred_r_lo))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# g3<-ggplot(win.sf,aes(fill=pred_r_hi))  + geom_sf() + scale_fill_gradient2() + ggtitle('Growth Rates') + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42)
-# 
-# lay <- rbind(c(1,1,2),c(1,1,3))
-# grid.arrange(g1,g2,g3,layout_matrix=lay)
+icar.samples  <- coda::mcmc.list(chain_output)
+rhats.after  <- coda::gelman.diag(icar.samples)
+icar.after  <- do.call(rbind.data.frame,icar.samples)
+save(icar.after,rhats.after,file=here('results','icar_after.RData'))
 

@@ -13,7 +13,7 @@ load(here('data','c14data.RData'))
 c14db$MacroRegion  <- 'SW Japan'
 c14db$MacroRegion[which(c14db$Region%in%c('Kanto','Chubu'))]  <- 'Central Japan'
 c14db$MacroRegion[which(c14db$Region=='Tohoku')]  <- 'NE Japan'
-c14db = subset(c14db,C14Age< (a+500) & C14Age> (b-500) &  Material == 'Terrestrial' & !PrefectureNameEn %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,SiteID,MacroRegion)
+c14db = subset(c14db,C14Age< (a+500) & C14Age> (b-500) &  Material == 'Terrestrial' & !PrefectureNameEn %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,SiteID,MacroRegion,RiceRegion)
 
 calibrated.dates  <- calibrate(c14db$C14Age,c14db$C14Error)
 
@@ -50,3 +50,35 @@ barCodes(x=BPtoBCAD(medCal(sw.japan.dates)),width = 10,yrng = c(0.95*par('usr')[
 legend('bottomright',legend=c(paste0('n=',length(sw.japan.dates))),bty='n',cex=1.5)
 legend('left',legend=c('SW Japan'),cex=2,bty='n')
 dev.off()
+
+
+# Arrival Region plots ----
+arrivalDF = data.frame(lo=c(-1251,-735,-1061,-946,-754,-471,-434,-709),
+		       mi=c(-1039,-570,-910,-824,-648,-271,-152,-428),
+		       hi=c(-872,-430,-779,-703,-560,-124,42,-203))
+
+
+
+regionNames  <- c('I','II','III','IV','V','VI','VII','VIII')
+regionCKDE  <- vector('list',length=length(regionNames))
+for (i in 1:length(regionNames))
+{
+	tmp  <- calibrated.dates[which(c14db$RiceRegion==regionNames[i])]
+	s.tmp  <- sampleDates(tmp,nsim=1000,boot=TRUE)
+	regionCKDE[[i]]  <- ckde(s.tmp,timeRange=c(3500,1700),bw=50,normalised=TRUE)
+}
+
+pdf(here('figures','ckde_riceregion.pdf'),width=8,height=10)
+par(mfrow=c(4,2),mar=c(5,4,2,1))
+for (i in rev(1:length(regionNames)))
+{
+	print(i)
+	plot(regionCKDE[[i]],type='envelope',calendar='BCAD',main=paste0('Area ',regionNames[[i]]))
+# 	abline(v=arrivalDF$lo[i],lty=2)
+# 	abline(v=arrivalDF$hi[i],lty=2)
+# 	abline(v=arrivalDF$mi[i],lty=1)
+	rect(ybottom=-100,ytop=100,xleft=arrivalDF$lo[i],xright=arrivalDF$hi[i],col=rgb(0.68,0.85,0.9,0.3),border=NA)
+	abline(v=arrivalDF$mi[i],lty=1)
+}
+dev.off()
+

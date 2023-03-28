@@ -42,16 +42,16 @@ theta.init[which(theta.init<=b)] = b + 1
 N <- nrow(c14db)
 
 # Define Spatial Structure
-win <- ne_states(country = "japan") |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
+# win <- ne_states(country = "japan") |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
 # sites <- select(c14db,SiteID,Longitude,Latitude)
 # coordinates(sites) <- c('Longitude','Latitude')
 # proj4string(sites) <- proj4string(win)
 # sites.sf <- as(sites,'sf')
 
 # Create Prefecture ID and add to c14db
-Npref <- length(win)
-win@data$ID = 1:Npref
-c14db$PrefID = match(c14db$Prefecture,win@data$name)
+# Npref <- length(win)
+# win@data$ID = 1:Npref
+c14db$PrefID = match(c14db$Prefecture,win$name)
 sort(table(c14db$PrefID))
 
 # Test Plot
@@ -59,9 +59,9 @@ sort(table(c14db$PrefID))
 # ggplot(data=win.sf) +  geom_sf() + xlab("Longitude") + ylab("Latitude") + xlim(130,142) + ylim(29,42) + geom_sf(data = sites.sf,shape=20,size=0.5)
 
 # Define Neighbourhood Structure
-W_nb <- poly2nb(win, row.names =  win@data$ID)
+# W_nb <- poly2nb(win, row.names =  win@data$ID)
 # Determine neighborhood/adjacency information needed for neighborhood-based CAR model
-nbInfo <- nb2WB(W_nb)
+# nbInfo <- nb2WB(W_nb)
 
 # Define Data
 d <- list(cra=c14db$C14Age,cra_error=c14db$C14Error)
@@ -122,6 +122,7 @@ thin  <- 5
 
 chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = constants, theta = theta.init, niter = niter, nburnin = nburnin,thin = thin)
 stopCluster(cl)
-icar.finaljomon  <- coda::mcmc.list(chain_output)
-rhats  <- coda::gelman.diag(icar.samples)
-save(icar.finaljomon,file=here('results','icar_finaljomon.RData'))
+icar.samples  <- coda::mcmc.list(chain_output)
+rhats.finaljomon  <- coda::gelman.diag(icar.samples)
+icar.finaljomon  <- do.call(rbind.data.frame,icar.samples)
+save(icar.finaljomon,rhats.finaljomon,file=here('results','icar_finaljomon.RData'))
