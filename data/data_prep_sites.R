@@ -192,7 +192,19 @@ d$Area[which(d$Prefecture%in%c('Aomori'))]  <- "VIII"
 
 d  <- subset(d,!is.na(Area))
 
+d$ricearrival <- NA
+d$ricearrival[d$Area=='I']  <- BCADtoBP(-1039)
+d$ricearrival[d$Area=='II']  <- BCADtoBP(-570)
+d$ricearrival[d$Area=='III']  <- BCADtoBP(-910)
+d$ricearrival[d$Area=='IV']  <- BCADtoBP(-824)
+d$ricearrival[d$Area=='V']  <- BCADtoBP(-648)
+d$ricearrival[d$Area=='VI']  <- BCADtoBP(-271)
+d$ricearrival[d$Area=='VII']  <- BCADtoBP(-152)
+d$ricearrival[d$Area=='VIII']  <- BCADtoBP(-428)
+
+sitedb  <- d
+
 
 # Save Output
-save(d,file=here('data','site_data.RData'))
+save(sitedb,file=here('data','sitedata.RData'))
 
