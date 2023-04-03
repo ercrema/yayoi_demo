@@ -204,6 +204,8 @@ d$ricearrival[d$Area=='VIII']  <- BCADtoBP(-428)
 
 sitedb  <- d
 
+#Eliminate sites with problematic chronologies
+sitedb  <- subset(sitedb,!is.na(m))
 
 # Save Output
 save(sitedb,file=here('data','sitedata.RData'))
