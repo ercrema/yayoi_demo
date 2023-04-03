@@ -61,7 +61,7 @@ d <- list(cra=c14db$C14Age,cra_error=c14db$C14Error)
 
 # Define Constants
 data(intcal20)
-constants  <-  list(Nregions=Nregions,N=N,adj=nbInfo$adj,weights=nbInfo$weights,num=nbInfo$num,L=length(nbInfo$adj),calBP=intcal20$CalBP,C14BP=intcal20$C14Age,C14err=intcal20$C14Age.sigma)
+constants  <-  list(Nregions=Nregions,N=N,adj=nbInfo.rice$adj,weights=nbInfo.rice$weights,num=nbInfo.rice$num,L=length(nbInfo.rice$adj),calBP=intcal20$CalBP,C14BP=intcal20$C14Age,C14err=intcal20$C14Age.sigma)
 constants$a <- c14db$a
 constants$b <- c14db$b
 constants$id.region <-c14db$RegionID
@@ -115,6 +115,6 @@ thin  <- 5
 chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = constants, theta = theta.init, niter = niter, nburnin = nburnin,thin = thin)
 stopCluster(cl)
 icar.samples <- coda::mcmc.list(chain_output)
-rhats.before500  <- coda::gelman.diag(icar.samples)
-icar.before500  <- do.call(rbind.data.frame,icar.samples)
-save(rhats.before500,icar.before500,file=here('results','icar_before500RR.RData'))
+rhats.before500rr  <- coda::gelman.diag(icar.samples)
+icar.before500rr  <- do.call(rbind.data.frame,icar.samples)
+save(rhats.before500rr,icar.before500rr,file=here('results','icar_before500RR.RData'))
