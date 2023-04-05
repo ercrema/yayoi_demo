@@ -64,6 +64,8 @@ theta.init <- d$X
 runFun <- function(seed, d, constants, theta.init, nburnin, niter, thin)
 {
 	library(nimbleCarbon)
+	library(here)
+	source(here('src','unif2.R'))
 	## ICAR  Model
 	icarmodel <- nimbleCode({
 		for (i in 1:N)
@@ -108,4 +110,4 @@ stopCluster(cl)
 icar.samples <- coda::mcmc.list(chain_output)
 rhats.sitesdouble  <- coda::gelman.diag(icar.samples)
 icar.sitesdouble  <- do.call(rbind.data.frame,icar.samples)
-save(rhats.before500,icar.before500,file=here('results','icar_sitesdoubleRes.RData'))
+save(rhats.sitesdouble,icar.sitesdouble,file=here('results','icar_sitesdoubleRes.RData'))
