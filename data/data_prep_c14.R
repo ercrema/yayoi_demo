@@ -8,7 +8,7 @@ library(spdep)
 source(here('src','dbscanID.R'))
 
 # Read 14C Data ----
-c14db  <- readRDS(here('data','c14db_0.2.1.Rds'))
+c14db  <- readRDS(here('data','c14db_1.0.0.Rds'))
 
 # Subset to Anthropogeneic Dates ----
 c14db <- subset(c14db,!is.na(Latitude)&!is.na(Longitude)&!PrefectureNameEn%in%c('Hokkaido','Okinawa'))
