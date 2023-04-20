@@ -13,11 +13,11 @@ library(parallel)
 
 # Load and prepare 14C and Spatial Data ----
 load(here('data','c14data.RData'))
-timespan  <- 500
+timespan  <- 750
 c14db$fromFarming  <- c14db$C14Age - c14db$ricearrival
 c14db$a = c14db$ricearrival + timespan
-c14db$b = c14db$ricearrival
-c14db = subset(c14db,fromFarming > -500 & fromFarming < (timespan+500) & Material == 'Terrestrial' & !PrefectureNameEn %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,a,b,SiteID,Prefecture=PrefectureNameEn,Longitude,Latitude,RiceRegion)
+c14db$b = c14db$ricearrival - timespan
+c14db = subset(c14db, C14Age < a+500 & C14Age > b-500 & Material == 'Terrestrial' & !Prefecture %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,a,b,ricearrival,SiteID,Prefecture,Longitude,Latitude,RiceRegion)
 
 regions  <- c('I','II','III','IV','V','VI','VII','VIII')
 regionList  <- vector('list',length=length(regions))
@@ -64,6 +64,7 @@ data(intcal20)
 constants  <-  list(Nregions=Nregions,N=N,adj=nbInfo.rice$adj,weights=nbInfo.rice$weights,num=nbInfo.rice$num,L=length(nbInfo.rice$adj),calBP=intcal20$CalBP,C14BP=intcal20$C14Age,C14err=intcal20$C14Age.sigma)
 constants$a <- c14db$a
 constants$b <- c14db$b
+constants$chp <- c14db$ricearrival
 constants$id.region <-c14db$RegionID
 
 
@@ -74,10 +75,10 @@ runFun <- function(seed, d, constants, theta.init, nburnin, niter, thin)
 {
 	library(nimbleCarbon)
 	## ICAR  Model
-	icarmodel <- nimbleCode({
+	icarmodel <- nimbleCode({ 
 		for (i in 1:N)
 		{
-			theta[i] ~ dExponentialGrowth(a=a[i],b=b[i],r=s[id.region[i]])
+			theta[i] ~ dDoubleExponentialGrowth(a=a[i],b=b[i],r1=s1[id.region[i]],r2=s2[id.region[i]],mu=chp[i])
 			c14age[i] <- interpLin(z=theta[i], x=calBP[], y=C14BP[]);
 			sigmaCurve[i] <- interpLin(z=theta[i], x=calBP[], y=C14err[]);
 			sigmaDate[i] <- (cra_error[i]^2+sigmaCurve[i]^2)^(1/2);
@@ -85,19 +86,22 @@ runFun <- function(seed, d, constants, theta.init, nburnin, niter, thin)
 		}
 
 		# ICAR Model Prior
-		s[1:Nregions] ~ dcar_normal(adj[1:L], weights[1:L], num[1:Nregions], tau, zero_mean =0)
-		tau <- 1/sigma^2
-		sigma ~ dunif(0,100)
+		s1[1:Nregions] ~ dcar_normal(adj[1:L], weights[1:L], num[1:Nregions], tau1, zero_mean =0)
+		s2[1:Nregions] ~ dcar_normal(adj[1:L], weights[1:L], num[1:Nregions], tau2, zero_mean =0)
+		tau1 <- 1/sigma1^2
+		tau2 <- 1/sigma2^2
+		sigma1 ~ dunif(0,100)
+		sigma2 ~ dunif(0,100)
 	})
 
 	## Setup Init
 	set.seed(seed)
-	inits <- list(sigma = runif(1,0,100), s = rnorm(constants$Nregions,sd=0.001),theta=theta.init)
+	inits <- list(sigma1 = runif(1,0,100),sigma2=runif(1,0,100), s1 = rnorm(constants$Nregions,sd=0.001),s2 = rnorm(constants$Nregions,sd=0.001),theta=theta.init)
 
 	#MCMC
 	model <- nimbleModel(icarmodel, constants = constants, data = d, inits = inits)
 	cModel <- compileNimble(model)
-	conf <- configureMCMC(model, monitors = c('s','sigma'))
+	conf <- configureMCMC(model, monitors = c('s1','s2','sigma1','sigma2'))
 	MCMC <- buildMCMC(conf)
 	cMCMC <- compileNimble(MCMC, project = cModel)
 	samples <- runMCMC(cMCMC, niter = niter, thin=thin,nburnin = nburnin,samplesAsCodaMCMC = T, setSeed = seed)
@@ -115,6 +119,6 @@ thin  <- 5
 chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = constants, theta = theta.init, niter = niter, nburnin = nburnin,thin = thin)
 stopCluster(cl)
 icar.samples <- coda::mcmc.list(chain_output)
-rhats.before500rr  <- coda::gelman.diag(icar.samples)
-icar.before500rr  <- do.call(rbind.data.frame,icar.samples)
-save(rhats.before500rr,icar.before500rr,file=here('results','icar_before500RR.RData'))
+rhats.c14double  <- coda::gelman.diag(icar.samples)
+icar.c14double <- do.call(rbind.data.frame,icar.samples)
+save(rhats.c14double,icar.c14double,file=here('results','icar_c14doubleRes750.RData'))

@@ -17,7 +17,7 @@ timespan  <- 500
 c14db$fromFarming  <- c14db$C14Age - c14db$ricearrival
 c14db$a = c14db$ricearrival + timespan
 c14db$b = c14db$ricearrival - timespan
-c14db = subset(c14db, C14Age < a+500 & C14Age > b-500 & Material == 'Terrestrial' & !PrefectureNameEn %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,a,b,ricearrival,SiteID,Prefecture=PrefectureNameEn,Longitude,Latitude,RiceRegion)
+c14db = subset(c14db, C14Age < a+500 & C14Age > b-500 & Material == 'Terrestrial' & !Prefecture %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,a,b,ricearrival,SiteID,Prefecture,Longitude,Latitude,RiceRegion)
 
 regions  <- c('I','II','III','IV','V','VI','VII','VIII')
 regionList  <- vector('list',length=length(regions))
