@@ -11,7 +11,7 @@ source(here('src','dbscanID.R'))
 c14db  <- readRDS(here('data','c14db_1.0.0.Rds'))
 
 # Subset to Anthropogeneic Dates ----
-c14db <- subset(c14db,!is.na(Latitude)&!is.na(Longitude)&!PrefectureNameEn%in%c('Hokkaido','Okinawa'))
+c14db <- subset(c14db,!is.na(Latitude)&!is.na(Longitude)&!Prefecture%in%c('Hokkaido','Okinawa'))
 # NOTE : Any script for removing non-anthropic dates should be included here
 # # Consider only dates with Retain=TRUE
 # c14db = subset(c14db,retain==TRUE & !Region %in% c('Hokkaido','Okinawa'))
@@ -25,16 +25,16 @@ c14db$SiteID  <- dbscanID(sitename=c14db$SiteNameEn,longitude = c14db$Longitude,
 
 # Add Region Field and Predicted Arrival of Rice in each:
 c14db$RiceRegion  <- NA
-c14db$RiceRegion[which(c14db$PrefectureNameEn%in%c('Fukuoka','Saga','Nagasaki'))]  <- "I"
-c14db$RiceRegion[which(c14db$PrefectureNameEn%in%c('Oita','Miyazaki','Kagoshima','Kumamoto'))]  <- "II"
-c14db$RiceRegion[which(c14db$PrefectureNameEn%in%c('Ehime','Kochi')|c14db$Region=='Chugoku')]  <- "III"
-c14db$RiceRegion[which(c14db$PrefectureNameEn%in%c('Kagawa','Tokushima')|c14db$Region=='Kansai')]  <- 'IV'
-c14db$RiceRegion[which(c14db$PrefectureNameEn%in%c('Kanagawa')|c14db$Region=='Chubu')]  <- "V"
-c14db$RiceRegion[which(c14db$PrefectureNameEn%in%c('Saitama','Gunma','Tokyo','Chiba','Tochigi','Ibaraki'))]  <- "VI"
-c14db$RiceRegion[which(c14db$PrefectureNameEn%in%c('Yamagata','Fukushima','Miyagi','Iwate','Akita'))]  <- "VII"
-c14db$RiceRegion[which(c14db$PrefectureNameEn%in%c('Aomori'))]  <- "VIII"
+c14db$RiceRegion[which(c14db$Prefecture%in%c('Fukuoka','Saga','Nagasaki'))]  <- "I"
+c14db$RiceRegion[which(c14db$Prefecture%in%c('Oita','Miyazaki','Kagoshima','Kumamoto'))]  <- "II"
+c14db$RiceRegion[which(c14db$Prefecture%in%c('Ehime','Kochi')|c14db$Region=='Chugoku')]  <- "III"
+c14db$RiceRegion[which(c14db$Prefecture%in%c('Kagawa','Tokushima')|c14db$Region=='Kansai')]  <- 'IV'
+c14db$RiceRegion[which(c14db$Prefecture%in%c('Kanagawa')|c14db$Region=='Chubu')]  <- "V"
+c14db$RiceRegion[which(c14db$Prefecture%in%c('Saitama','Gunma','Tokyo','Chiba','Tochigi','Ibaraki'))]  <- "VI"
+c14db$RiceRegion[which(c14db$Prefecture%in%c('Yamagata','Fukushima','Miyagi','Iwate','Akita'))]  <- "VII"
+c14db$RiceRegion[which(c14db$Prefecture%in%c('Aomori'))]  <- "VIII"
 # any(is.na(c14db$RiceRegion))
-# c14db$PrefectureNameEn[which(is.na(c14db$RiceRegion))]
+# c14db$Prefecture[which(is.na(c14db$RiceRegion))]
 
 # Add rice arrival date in BP
 c14db$ricearrival <- NA
