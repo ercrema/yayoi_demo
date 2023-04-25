@@ -15,13 +15,47 @@ library(here)
 library(parallel)
 
 # Load ICAR Results ----
-load(here('results','icar_finaljomon.RData'))
-load(here('results','icar_yayoi.RData'))
-load(here('results','icar_before.RData'))
-load(here('results','icar_after.RData'))
-load(here('results','icar_after500.RData'))
+load(here('results','icar_c14doubleRes.RData'))
+load(here('results','icar_c14doubleRes750.RData'))
+load(here('results','icar_sitesdoubleRes.RData'))
+
+
+post.bar <- function(x,i,h=0.4,col)
+{
+	require(grDevices)
+	width  <- rev(width)
+	col.alpha <- c(0.3,0.6,0.9)
+	blocks  <- quantile(x,prob=c(0.025,0.1,0.25,0.75,0.9,0.975))
+	rect(xleft=blocks[1],xright=blocks[2],ybottom=i-h/5,ytop=i+h/5,border=NA,col=adjustcolor(col,alpha.f=0.3))
+	rect(xleft=blocks[2],xright=blocks[3],ybottom=i-h/5,ytop=i+h/5,border=NA,col=adjustcolor(col,alpha.f=0.6))
+	rect(xleft=blocks[3],xright=blocks[4],ybottom=i-h/5,ytop=i+h/5,border=NA,col=adjustcolor(col,alpha.f=0.9))
+	rect(xleft=blocks[4],xright=blocks[5],ybottom=i-h/5,ytop=i+h/5,border=NA,col=adjustcolor(col,alpha.f=0.6))
+	rect(xleft=blocks[5],xright=blocks[6],ybottom=i-h/5,ytop=i+h/5,border=NA,col=adjustcolor(col,alpha.f=0.3))
+}
+
+
+
+# Summarise data ----
+icar.resc14500  <- icar.c14double[,1:16] * 100
+c14.500  <- gather(icar.resc14500)
+c14.500$periods  <- NA
+c14.500$periods  <- "before"
+c14.500$periods[grep("s2",c14.500$key)]  <- "after"
+c14.500$time  <- as.roman(as.numeric(substr(c14.500$key,4,4)))
+
+a  <- subset(c14.500,time==1&periods=='before')$value
+plot(NULL,xlim=c(-0.5,0.5),ylim=c(0,2))
+post.bar(a,i=1,col='blue')
+
+
+
 
 # Extract summaries
+icarc14.500.m  <- apply(icar.c14double[,1:16],2,median) * 100
+icarc14.500.lo  <- apply(icar.c14double[,1:16],2,quantile,0.1) * 100
+icarc14.500.hi  <- apply(icar.c14double[,1:16],2,quantile,0.9) * 100
+
+
 finaljomon.m <- apply(icar.finaljomon,2,median) * 100
 finaljomon.lo <- apply(icar.finaljomon,2,quantile,0.1) * 100
 finaljomon.hi <- apply(icar.finaljomon,2,quantile,0.9) * 100
