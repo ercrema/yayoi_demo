@@ -121,4 +121,5 @@ stopCluster(cl)
 icar.samples <- coda::mcmc.list(chain_output)
 rhats.c14double750  <- coda::gelman.diag(icar.samples)
 icar.c14double750 <- do.call(rbind.data.frame,icar.samples)
-save(rhats.c14double750,icar.c14double750,file=here('results','icar_c14doubleRes750.RData'))
+c14db750 <- c14db
+save(c14db750,rhats.c14double750,icar.c14double750,file=here('results','icar_c14doubleRes750.RData'))
