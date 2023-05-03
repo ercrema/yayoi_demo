@@ -4,20 +4,17 @@ library(rnaturalearth)
 library(sf)
 library(maptools)
 library(rgeos)
+library(dplyr)
 library(spdep)
 source(here('src','dbscanID.R'))
 
 # Read 14C Data ----
 c14db  <- readRDS(here('data','c14db_1.0.0.Rds'))
+c14db.raw  <- readRDS(here('data','c14raw_1.0.0.Rds')) |> subset(toKeep==TRUE) |> select(LabCode,SamplingLocation)
+c14db  <- left_join(c14db,c14db.raw)
 
-# Subset to Anthropogeneic Dates ----
+# Subset to Key Regions ----
 c14db <- subset(c14db,!is.na(Latitude)&!is.na(Longitude)&!Prefecture%in%c('Hokkaido','Okinawa'))
-# NOTE : Any script for removing non-anthropic dates should be included here
-# # Consider only dates with Retain=TRUE
-# c14db = subset(c14db,retain==TRUE & !Region %in% c('Hokkaido','Okinawa'))
-# # Add Booleans fields
-# anthropicGrep = c("住居","埋葬","竪穴建物","掘立柱","墓","包含層","土坑","ピット","土器","捨場","遺構","炉","人骨","木舟","住","柱","Pit","焼土","カマド","床面","溝中","溝底部","建物跡","木製品","埋土","水田","竪坑","羨道","集石","漆器")
-# c14db$anthropic = grepl(paste(anthropicGrep,collapse="|"),c14db$SamplingLocation) #sum(c14db$anthropic) 10683
 
 # Aggregate into aritifical Sites using DBSCAN ----
 # Add SiteID based on DBSCAN
@@ -58,6 +55,17 @@ c14db$C14Error[i] = c14db$CRAError[i]
 
 c14db  <- subset(c14db,!is.na(C14Age) & !is.na(C14Error))
 
+# Chronological Subsetting ----
+c14db <- subset(c14db,C14Age < (max(c14db$ricearrival) + 1000) & C14Age >= (min(c14db$ricearrival) - 1000))
+
+# Consider only terrestrial dates ----
+c14db  <- subset(c14db,Material=='Terrestrial')
+
+# Consider only anthropogenic dates ----
+anthropicGrep = c("住居","埋葬","竪穴建物","掘立柱","墓","包含層","土坑","ピット","土器","捨場","遺構","炉","人骨","木舟","住","柱","Pit","焼土","カマド","床面","溝中","溝底部","建物跡","木製品","埋土","水田","竪坑","羨道","集石","漆器","トチ塚","層","貯蔵穴","掘立","木棺","方形周溝","配石","窯","遺物","竪穴","道","棺","石室","址","室","SI","SB","SK")
+c14db$anthropic = grepl(paste(anthropicGrep,collapse="|"),c14db$SamplingLocation) #sum(c14db$anthropic) 10683
+# write.csv(unique(select(c14db,SamplingLocation,anthropic)),file="temp.csv")
+c14db  <- subset(c14db,anthropic==TRUE)
 # Spatial Data -----
 # Prefecture Based
 win <- ne_states(country = "japan",returnclass = 'sf') |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
