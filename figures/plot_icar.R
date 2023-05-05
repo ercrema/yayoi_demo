@@ -147,7 +147,7 @@ for (i in 1:8)
 
 
 # Summarise data ----
-icar.res.c14.500  <- icar.res.c14.500.net <-  icar.c14double[,1:16] * 100
+icar.res.c14.500  <- icar.res.c14.500.net <-  icar.c14double500[,1:16] * 100
 icar.res.c14.750  <- icar.res.c14.750.net <-  icar.c14double750[,1:16] * 100
 icar.res.c14.1000  <- icar.res.c14.1000.net <-  icar.c14double1000[,1:16] * 100
 icar.res.sites.500  <- icar.res.sites.500.net <-  icar.sitesdouble[,1:16] * 100

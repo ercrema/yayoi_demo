@@ -56,7 +56,7 @@ c14db$C14Error[i] = c14db$CRAError[i]
 c14db  <- subset(c14db,!is.na(C14Age) & !is.na(C14Error))
 
 # Chronological Subsetting ----
-c14db <- subset(c14db,C14Age < (max(c14db$ricearrival) + 1000) & C14Age >= (min(c14db$ricearrival) - 1000))
+c14db <- subset(c14db,C14Age < (max(c14db$ricearrival) + 2000) & C14Age >= (min(c14db$ricearrival) - 2000))
 
 # Consider only terrestrial dates ----
 c14db  <- subset(c14db,Material=='Terrestrial')
