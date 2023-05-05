@@ -7,6 +7,7 @@ library(dplyr)
 library(maptools)
 library(rgeos)
 
+load(here('data','c14data.RData'))
 win  <- ne_countries(scale=10)
 japan <- ne_states(country = "japan") |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
 df.pref.reg <- read.csv(here('data','prefecture_region_match.csv'))
@@ -16,7 +17,6 @@ japan.sf <- as(japan,'sf')
 win <- gUnaryUnion(win,id=win@data[,1])
 
 
-load(here('data','c14data.RData'))
 c14sites  <- select(c14db,Longitude,Latitude) |> unique() |> st_as_sf(x=_,coords=c('Longitude','Latitude'),crs=4326)
 
 
