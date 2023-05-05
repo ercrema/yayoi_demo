@@ -98,8 +98,6 @@ c14db$Yayoi  <- FALSE
 c14db$Yayoi[ii]  <- TRUE
 c14db$D500  <- FALSE
 c14db$D750  <- FALSE
-ricearrival = data.frame(regions=1:8,m = c(-1039,-570,-910,-824,-648,-271,-152,-428))
-(BCADtoBP(ricearrival$m))
 
 c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2988+500)&BP>(2988-500),p=0.5),c14db$RiceRegion=='I')] <- TRUE
 c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2519+500)&BP>(2519-500),p=0.5),c14db$RiceRegion=='II')] <- TRUE
