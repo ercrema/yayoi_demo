@@ -1,0 +1,40 @@
+library(here)
+library(grDevices)
+library(RColorBrewer)
+library(rnaturalearth)
+library(sf)
+library(dplyr)
+library(maptools)
+library(rgeos)
+
+win  <- ne_countries(scale=10)
+japan <- ne_states(country = "japan") |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
+df.pref.reg <- read.csv(here('data','prefecture_region_match.csv'))
+japan@data <- left_join(japan@data,df.pref.reg,by=c('name'='Prefecture'))
+japan <- gUnaryUnion(japan,id=japan@data$Area)
+japan.sf <- as(japan,'sf')
+win <- gUnaryUnion(win,id=win@data[,1])
+
+
+load(here('data','c14data.RData'))
+c14sites  <- select(c14db,Longitude,Latitude) |> unique() |> st_as_sf(x=_,coords=c('Longitude','Latitude'),crs=4326)
+
+
+cols  <- brewer.pal('Set2',n=8)
+
+
+pdf(file=here('figures','figure1.pdf'),width=2.55,height=2.8,pointsize=1)
+plot(win,xlim=c(127,143),ylim=c(31,43),col=NA,lwd=0.5)
+rect(xleft=100,xright=150,ybottom=20,ytop=50,border=NA,col='powderblue')
+abline(v=seq(129,143,2),h=seq(30,42,2),col='grey77',lwd=0.2)
+plot(win,xlim=c(127,143),ylim=c(31,43),col='white',add=TRUE,lwd=0.5)
+plot(japan.sf,col=adjustcolor(cols,alpha.f = 0.9),border='grey77',add=TRUE,lwd=0.2) 
+plot(win,xlim=c(127,143),ylim=c(31,43),col=NA,add=TRUE,lwd=0.5)
+plot(c14sites,pch=20,cex=0.1,add=TRUE)
+text(x=c(129.99,132.12,131.83,134.91,136.32,141.76,142.58,142.25),y=c(34.24,31.75,35.95,36.42,37.94,35.42,38.54,41.34),labels=as.roman(1:8),cex=1)
+axis(1,at=seq(129,143,2),tck=-0.01,padj=-0.8)
+axis(2,at=seq(30,42,2),tck=-0.01,padj=0.8)
+mtext(side=1,line =1.4,'Longitude')
+mtext(side=2,line=1.4,'Latitude')
+box()
+dev.off()
