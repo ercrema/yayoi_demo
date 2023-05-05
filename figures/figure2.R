@@ -15,13 +15,12 @@ ricearrival = data.frame(regions=1:8,
 
 sitedb$RegionID = match(sitedb$Area,win.riceregion$riceregion)
 
-caldates  <- calibrate(c14db$C14Age,c14db$C14Error)
-# caldates.n  <- calibrate(c14db$C14Age,c14db$C14Error,normalised=FALSE)
-ii  <- which.CalDates(caldates,BP<3300&BP>1500,p=0.5)
-calibrated.dates  <- caldates[ii]
-# calibrated.dates.n <- caldates.n[ii]
-c14db  <- c14db[ii,]
+# Window of display
+c14db <- subset(c14db,Yayoi==TRUE)
+a  <- 2950
+b  <- 1650
 
+calibrated.dates  <- calibrate(c14db$C14Age,c14db$C14Error)
 bin50  <- binPrep(sites = c14db$SiteID,ages=calibrated.dates,h=50)
 i  <- thinDates(ages=c14db$C14Age,  errors=c14db$C14Error, bins=bin50, size=1, thresh=1,seed=123,method='splitsample')
 c14db  <-  c14db[i,]
@@ -29,9 +28,6 @@ calibrated.dates  <- calibrated.dates[i]
 # calibrated.dates.n  <- calibrated.dates.n[i]
 
 
-# Window of display
-a  <- 2950
-b  <- 1650
 # Number of CKDE simulations
 nsim  <- 1000
 # Generate lists of storing results
