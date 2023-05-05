@@ -91,6 +91,34 @@ win.riceregion$ID  <- 1:Nregions
 W_nb.rice <- poly2nb(win.riceregion, row.names =  win.riceregion$ID)
 nbInfo.rice <- nb2WB(W_nb.rice)
 
+# Attach subsetting Labels ----
+calibrated.dates  <- calibrate(c14db$C14Age,c14db$C14Error)
+ii  <- which.CalDates(calibrated.dates,BP<2950&BP>1650,p=0.5)
+c14db$Yayoi  <- FALSE
+c14db$Yayoi[ii]  <- TRUE
+c14db$D500  <- FALSE
+c14db$D750  <- FALSE
+ricearrival = data.frame(regions=1:8,m = c(-1039,-570,-910,-824,-648,-271,-152,-428))
+(BCADtoBP(ricearrival$m))
+
+c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2988+500)&BP>(2988-500),p=0.5),c14db$RiceRegion=='I')] <- TRUE
+c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2519+500)&BP>(2519-500),p=0.5),c14db$RiceRegion=='II')] <- TRUE
+c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2859+500)&BP>(2859-500),p=0.5),c14db$RiceRegion=='III')] <- TRUE
+c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2773+500)&BP>(2773-500),p=0.5),c14db$RiceRegion=='IV')] <- TRUE
+c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2597+500)&BP>(2597-500),p=0.5),c14db$RiceRegion=='V')] <- TRUE
+c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2220+500)&BP>(2220-500),p=0.5),c14db$RiceRegion=='VI')] <- TRUE
+c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2101+500)&BP>(2101-500),p=0.5),c14db$RiceRegion=='VII')] <- TRUE
+c14db$D500[unique(which.CalDates(calibrated.dates,BP<(2377+500)&BP>(2377-500),p=0.5),c14db$RiceRegion=='VIII')] <- TRUE
+
+c14db$D750[unique(which.CalDates(calibrated.dates,BP<(2988+750)&BP>(2988-750),p=0.5),c14db$RiceRegion=='I')] <- TRUE
+c14db$D750[unique(which.CalDates(calibrated.dates,BP<(2519+750)&BP>(2519-750),p=0.5),c14db$RiceRegion=='II')] <- TRUE
+c14db$D750[unique(which.CalDates(calibrated.dates,BP<(2859+750)&BP>(2859-750),p=0.5),c14db$RiceRegion=='III')] <- TRUE
+c14db$D750[unique(which.CalDates(calibrated.dates,BP<(2773+750)&BP>(2773-750),p=0.5),c14db$RiceRegion=='IV')] <- TRUE
+c14db$D750[unique(which.CalDates(calibrated.dates,BP<(2597+750)&BP>(2597-750),p=0.5),c14db$RiceRegion=='V')] <- TRUE
+c14db$D750[unique(which.CalDates(calibrated.dates,BP<(2220+750)&BP>(2220-750),p=0.5),c14db$RiceRegion=='VI')] <- TRUE
+c14db$D750[unique(which.CalDates(calibrated.dates,BP<(2101+750)&BP>(2101-750),p=0.5),c14db$RiceRegion=='VII')] <- TRUE
+c14db$D750[unique(which.CalDates(calibrated.dates,BP<(2377+750)&BP>(2377-750),p=0.5),c14db$RiceRegion=='VIII')] <- TRUE
+
 # Store everything in a R image file ----
 
 save(c14db,win,win.riceregion,Npref,Nregions,W_nb,nbInfo,W_nb.rice,nbInfo.rice,file=here('data','c14data.RData'))
