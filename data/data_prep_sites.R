@@ -184,7 +184,7 @@ d$Area <- NA
 d$Area[which(d$Prefecture%in%c('Fukuoka','Saga','Nagasaki'))]  <- "I"
 d$Area[which(d$Prefecture%in%c('Oita','Miyazaki','Kagoshima','Kumamoto'))]  <- "II"
 d$Area[which(d$Prefecture%in%c('Ehime','Kochi')|d$Region=='Chugoku')]  <- "III"
-d$Area[which(d$Prefecture%in%c('Kagawa','Tokushima')|d$Region=='Kinki')]  <- 'IV'
+d$Area[which(d$Prefecture%in%c('Kagawa','Tokushima')|d$Region=='Kansai')]  <- 'IV'
 d$Area[which(d$Prefecture%in%c('Kanagawa')|d$Region=='Chubu')]  <- "V"
 d$Area[which(d$Prefecture%in%c('Saitama','Gunma','Tokyo','Chiba','Tochigi','Ibaraki'))]  <- "VI"
 d$Area[which(d$Prefecture%in%c('Yamagata','Fukushima','Miyagi','Iwate','Akita'))]  <- "VII"
