@@ -15,26 +15,11 @@ library(parallel)
 load(here('data','c14data.RData'))
 timespan  <- 500
 c14db$fromFarming  <- c14db$C14Age - c14db$ricearrival
-c14db$a = c14db$ricearrival + timespan
-c14db$b = c14db$ricearrival - timespan
-c14db = subset(c14db, C14Age < a+500 & C14Age > b-500 & Material == 'Terrestrial' & !Prefecture %in% c('Hokkaido','Okinawa')) |> select(C14Age,C14Error,a,b,ricearrival,SiteID,Prefecture,Longitude,Latitude,RiceRegion)
-
-regions  <- c('I','II','III','IV','V','VI','VII','VIII')
-regionList  <- vector('list',length=length(regions))
-for (i in 1:length(regions))
-{
-	tmp.subset  <- subset(c14db,RiceRegion==regions[i])
-	tmp.cal  <- calibrate(tmp.subset$C14Age,tmp.subset$C14Error)
-	tmp.subset$medCal  <- medCal(tmp.cal)
-	tmp.subset$include  <- FALSE
-	a  <-  tmp.subset$a[1]
-	b  <- tmp.subset$b[1]
-	tmp.subset$include[which.CalDates(tmp.cal,BP<a&BP>b,p=0.5)]  <- TRUE
-	regionList[[i]]  <- tmp.subset
-}
-
-c14db  <- do.call(rbind.data.frame,regionList) |> subset(x=_,include==TRUE)
+c14db$a  <-  c14db$ricearrival + timespan
+c14db$b  <-  c14db$ricearrival - timespan
+c14db  <-  select(c14db,C14Age,C14Error,a,b,ricearrival,SiteID,Prefecture,Longitude,Latitude,RiceRegion,medCal,D500) |> filter(D500==T)
 calibrated.dates  <- calibrate(c14db$C14Age,c14db$C14Error)
+regions  <- c('I','II','III','IV','V','VI','VII','VIII')
 # Site Level Thinning
 bin50  <- binPrep(sites = c14db$SiteID,ages=calibrated.dates,h=50)
 i  <- thinDates(ages=c14db$C14Age,  errors=c14db$C14Error, bins=bin50, size=1, thresh=1,seed=123,method='splitsample')
