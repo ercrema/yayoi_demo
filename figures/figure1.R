@@ -17,7 +17,7 @@ japan.sf <- as(japan,'sf')
 win <- gUnaryUnion(win,id=win@data[,1])
 
 
-c14sites  <- select(c14db,Longitude,Latitude) |> unique() |> st_as_sf(x=_,coords=c('Longitude','Latitude'),crs=4326)
+c14sites  <- subset(c14db,Yayoi==T|D500==T|D750==T) |> select(Longitude,Latitude) |> unique() |> st_as_sf(x=_,coords=c('Longitude','Latitude'),crs=4326)
 
 
 cols  <- brewer.pal('Set2',n=8)
