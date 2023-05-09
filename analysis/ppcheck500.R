@@ -15,6 +15,7 @@ c14db  <-  c14db[i,]
 # Sim settings
 nsim  <- 500
 ncores  <- 5
+ppcheck500  <- vector("list",length=8)
 
 # PPcheck ----
 for (i in 1:8)
@@ -29,8 +30,11 @@ for (i in 1:8)
 	params$r2  <- icar.c14double500[,i+8]
         params$mu  <- rep(ra,nrow(icar.c14double500))
 	tmp.res  <- postPredSPD(tmp.c14data$C14Age,tmp.c14data$C14Error,calCurve='intcal20',model=dDoubleExponentialGrowth,a=a,b=b,params=params,nsim=nsim,ncores=ncores,verbose=FALSE,method='uncalsample')
+	ppcheck500[[i]] <- tmp.res
 	assign(paste0('ppcheck.500_',i),tmp.res)
 }
+
+save(ppcheck500,file=here('results','ppcheck500.RData'))
 
 save(ppcheck.500_1,file=here('results','ppcheck500_1.RData'))
 save(ppcheck.500_2,file=here('results','ppcheck500_2.RData'))

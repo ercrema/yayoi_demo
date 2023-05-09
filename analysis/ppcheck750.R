@@ -15,6 +15,7 @@ c14db  <-  c14db[i,]
 # Sim settings
 nsim  <- 500
 ncores  <- 5
+ppcheck750  <- vector("list",length=8)
 
 # PPcheck ----
 for (i in 1:8)
@@ -29,14 +30,6 @@ for (i in 1:8)
 	params$r2  <- icar.c14double750[,i+8]
         params$mu  <- rep(ra,nrow(icar.c14double750))
 	tmp.res  <- postPredSPD(tmp.c14data$C14Age,tmp.c14data$C14Error,calCurve='intcal20',model=dDoubleExponentialGrowth,a=a,b=b,params=params,nsim=nsim,ncores=ncores,verbose=FALSE,method='uncalsample')
-	assign(paste0('ppcheck.750_',i),tmp.res)
+	ppcheck750[[i]] <- tmp.res
 }
-
-save(ppcheck.750_1,file=here('results','ppcheck750_1.RData'))
-save(ppcheck.750_2,file=here('results','ppcheck750_2.RData'))
-save(ppcheck.750_3,file=here('results','ppcheck750_3.RData'))
-save(ppcheck.750_4,file=here('results','ppcheck750_4.RData'))
-save(ppcheck.750_5,file=here('results','ppcheck750_5.RData'))
-save(ppcheck.750_6,file=here('results','ppcheck750_6.RData'))
-save(ppcheck.750_7,file=here('results','ppcheck750_7.RData'))
-save(ppcheck.750_8,file=here('results','ppcheck750_8.RData'))
+save(ppcheck750,file=here('results','ppcheck750.RData'))
