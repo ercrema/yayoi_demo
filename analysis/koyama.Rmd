@@ -1,0 +1,40 @@
+# Koyama's Original Model
+
+Koyama's original model is based on the following equation:
+
+$P_h/S_h = P_j/S_j$
+
+Where $P_h$ and $P_j$ are the population sizes of Haji and Jomon periods, and $S_h$ and $S_j$ are the number of sites.
+The Equation holds as long as the following assumptions are met:
+
+1) Both periods have the same duration in time
+2) Sites of both period contribute equally to the total population size
+3) Site number does not change abruptly during each period.
+
+If this is the case then it is possible to estimate the Jomon population size by the following equation:
+
+$P_j = S_h/P_h * S_j$
+
+The example below is the one used for the Middle Jomon (originally J3) period:
+
+```{r}
+read.csv("data/siteperprefperiod_cleaned.csv')
+Ph=9443300
+Sh=5549
+Sj=3977 #for middle Jomon
+Pj = Ph/Sh * Sj
+
+```
+
+The three assumptions are however potential problematic. For assumption (2) Koyama suggest a weighting. This is because the Jomon sites are exepcted to have smaller size, and given the same number of sites and duration there should be smaller population size. Koyama explores two values 1/7 and 1/5, and settles for the former so that the revised equation becomes:
+
+
+$P_j = S_h/P_h * S_j * C_j$
+
+Where $C_j$ is the correction factor, equivalent in the case of middle Jomon to 1/7.
+
+# Understanding Koyama's inconsistencies:
+
+Kanto yielded a total of 3,977 Jomon 3 sites and 5,549 Haji sites. The eighth century population of this area is calculated at 943,300. Therefbre, the value of a Haji site is 170 (VH=943,OOO÷5,549). The ratio of Jomon 3 to Haji site is .71 $(T_{j3}÷T_h==3,977÷5,549)$. If we assume an equal value for Jomon and Haji sites, the population of Jomon 3 in Kanto becomes $676,068 (.71 \time 943,300)$. Since a Jomon 3 site is actually valued at 1/5 or 1/7 of a Haji site, the maximum population, when $1/5$ is used as the constant, is $135,214$.
+
+
