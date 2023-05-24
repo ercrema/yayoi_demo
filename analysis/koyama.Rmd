@@ -238,7 +238,7 @@ text(newsitecount,fujio,names(fujio),pos=3)
 
 ```{r}
 
-correct_perdiod=read.csv("yayoiduration.csv")
+correct_perdiod=read.csv("data/yayoiduration.csv")
 Cyh=1000/abs(sapply(gsub("BC","-",correct_perdiod[3:9]),function(i)eval(parse(text=i))))
 names(Cyh)=colnames(correct_perdiod)[3:9]
 
