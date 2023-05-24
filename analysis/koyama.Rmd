@@ -1,3 +1,20 @@
+---
+title: "Demography Koyama's adapatation"
+author: "SC"
+date: "`r Sys.time()`"
+output: 
+    bookdown::html_document2:
+        code_folding: show
+        section_numbers: true
+        toc: true
+        toc_depth: 3
+        toc_float: true
+---
+
+```{r}
+
+knitr::opts_chunk$set(warning=FALSE,message=FALSE,cache=FALSE,collapse=TRUE,fig.show="hold",results="hide")
+```
 # Koyama's Original Model
 
 Koyama's original model is based on the following equation:
@@ -18,7 +35,6 @@ $P_j = S_h/P_h * S_j$
 The example below is the one used for the Middle Jomon (originally J3) period:
 
 ```{r}
-read.csv("data/siteperprefperiod_cleaned.csv')
 Ph=9443300
 Sh=5549
 Sj=3977 #for middle Jomon
@@ -35,6 +51,197 @@ Where $C_j$ is the correction factor, equivalent in the case of middle Jomon to 
 
 # Understanding Koyama's inconsistencies:
 
-Kanto yielded a total of 3,977 Jomon 3 sites and 5,549 Haji sites. The eighth century population of this area is calculated at 943,300. Therefbre, the value of a Haji site is 170 (VH=943,OOO÷5,549). The ratio of Jomon 3 to Haji site is .71 $(T_{j3}÷T_h==3,977÷5,549)$. If we assume an equal value for Jomon and Haji sites, the population of Jomon 3 in Kanto becomes $676,068 (.71 \time 943,300)$. Since a Jomon 3 site is actually valued at 1/5 or 1/7 of a Haji site, the maximum population, when $1/5$ is used as the constant, is $135,214$.
+From his own words:
 
+> Kanto yielded a total of $3,977$ Jomon 3 sites and 5,549 Haji sites. The eighth century population of this area is calculated at 943,300. Therefbre, the value of a Haji site is 170 (VH=943,OOO÷5,549). The ratio of Jomon 3 to Haji site is .71 $(T_{j3}÷T_h==3,977÷5,549)$. If we assume an equal value for Jomon and Haji sites, the population of Jomon 3 in Kanto becomes $676,068 (.71 \time 943,300)$. Since a Jomon 3 site is actually valued at 1/5 or 1/7 of a Haji site, the maximum population, when $1/5$ is used as the constant, is $135,214$.
+
+
+If we take back his numbers. `ksn` store is table with the number of settlements counted for each prefectures (is table 2 from his paper 1978) .  `groupedsite` is the table 3 where site are grouped dby region, we can alread see there don't match if we manually add them, probably because of typo
+```{r}
+ksn=read.csv("data/koyama78sitenumber.csv")
+groupedsite=read.csv("data/koyama78groupedsn.csv",row.names=1)
+yayoiGSN=groupedsite$Yayoi.Total
+names(yayoiGSN)=rownames(groupedsite)
+yayoiRecGSN=tapply(ksn$Yayoi.Total,ksn$Region,sum,na.rm=T)
+n=names(yayoiRecGSN)
+yayoiGSN[n]-yayoiRecGSN[n]
+```
+
+Let's recompute the Jomon population for all regions using Kanto's medevial population and site counts as reference. Koyama's 
+
+```{r}
+Th=sum(ksn$Haji.Total[ ksn$Region == "Kanto"])
+Tj=sum(ksn$J.3[ ksn$Region == "Kanto"],na.rm=T)
+regmatches=read.csv("data/prefecture_region_match.csv")
+trad=readRDS("../encounter_data/traductionRegion.RDS")
+
+#number of site during yayoi:
+Ty=yayoiRecGSN[n]
+pop_yayoi=Ty*(943000/Th)*1/3
+pop_yayoi=rbind(pop_yayoi,Ty*(943300/Th)*1/3)
+rownames(pop_yayoi)=c("943,000","943,300")
+barplot(pop_yayoi,las=3,beside=T,legend=T)
+
+```
+
+Compare to what is written in 1984 paper where is supposedly used the same method but "corrected" some values:
+
+```{r}
+kps=read.csv("data/koyama_popestimate_1984.csv")
+
+trad=gsub("地方","",trad)
+regions=sapply(kps[-nrow(kps),1],function(i,trad)names(trad)[trad==i],trad=trad)
+regions["近畿"]="Kinki"
+kps$reg_en =NA
+kps$reg_en[1:9] =unlist(regions)
+kpsy=kps[,"弥生"]
+names(kpsy)=kps$reg_en
+pop_yayoi=rbind(pop_yayoi,K84=kpsy[colnames(pop_yayoi)])
+
+barplot(pop_yayoi,las=3,beside=T,legend=T,main="pop estimate, fixed ratio, 3 versions")
+```
+
+## Region dependend Ratio:
+
+Still using Koyama sites counts but refining to use a ratio region-depent:
+
+```{r,out.width="45%"}
+Ph=kps[,"土師"]
+names(Ph)=kps$reg_en
+hajiRecGSN=tapply(ksn$Haji.Total,ksn$Region,sum,na.rm=T)
+Cyh=(Ph[names(hajiRecGSN)]/hajiRecGSN)
+Cyh[is.infinite(Cyh)]=Cyh["Kanto"]
+varPop=Ty*Cyh*1/3
+pop_yayoi=rbind(pop_yayoi,varpop=varPop)
+barplot(pop_yayoi,beside=T,legend=T)
+pop_yayoi=pop_yayoi[,-1]
+col=adjustcolor(c("#8DD3C7","#FFFFB3","#BEBADA","#FB8072"),.8)
+
+barplot(pop_yayoi,beside=T,log="y",col=col,las=3)
+legend("topleft",legend=rownames(pop_yayoi),fill=col)
+```
+
+This yield  very wrong result cause the site counts are way off. We need to use updated count numbers.
+
+Looking at the prefecture level:
+
+
+```{r}
+Th_p=ksn$Haji.Total
+names(Th_p)=ksn$Region
+Ty_p=ksn$Yayoi.Total
+names(Ty_p)=ksn$Prefecture
+
+Rh_p=Ph[ksn$Region]/Th_p
+Rh_p[is.na(Rh_p)]=Ph["Kanto"]/Th_p["Kanto"]
+Py_p=Ty_p * Rh_p * 1/3
+barplot(Py_p,las=3,log="y",main="pop estimate per pref, Koyama counts")
+```
+
+Grouping these prefecture by Rice Area:
+
+```{r}
+areas=read.csv("data/prefecture_region_match.csv")
+a=(areas$Area)
+names(a)=areas$Prefecture
+ksn=merge(areas,ksn,by="Prefecture")
+Ty_a=tapply(ksn$Yayoi.Total,ksn$Area,sum,na.rm=T)
+```
+
+## Using new settlement count
+
+Now using new settlements counts ; we first compare the sites counts ; at the Prefecture level:
+
+```{r,fig.lab="Site count at prefetur level"}
+newcounts =read.csv("data/siteperprefperiod_cleaned.csv")
+trans=read.csv("data/prefectures_translations.csv")
+newcounts=merge(newcounts,trans,by=1)
+Ty_pnew=newcounts$弥生
+names(Ty_pnew)=newcounts$Translation
+barplot(rbind(updated=Ty_pnew,Koyama=Ty_p[names(Ty_pnew)]),col=adjustcolor(1:2,.7),legend=T,beside=T,las=3,main="Number of settlement per prefecture for Yayoi Period")
+```
+
+### Site per region and population esetimate:
+
+Compute $T_{h,r}$, for each  region $r$ the total number of site during $h$ Haji period using this new dataset and $T_{y,r}$  the same for Yayoi period
+
+```{r}
+Th_pnew=newcounts$古墳+newcounts$古代
+Th_rn=tapply(Th_pnew,newcounts$Region.alt,sum)
+
+```
+
+Does the count really correlate with the popualtion estimates?
+
+```{r}
+par(xpd=NA)
+plot(Th_rn,Ph[names(Th_rn)],log="y",pch=21,bg=adjustcolor(2,.5),ylab="Population Estimate",xlab="Site count")
+text(Th_rn,Ph[names(Th_rn)],labels = names(Th_rn),pos=3)
+```
+
+
+### Ratio Population/Site
+
+Compute the ratio $R_{h,r}=\frac{P_{h,r}}{T_{h,r}}$, $T_{h,r}$ the number of site for region r during haji period, $P_{h,r}$ the population estimate during haji period for the region $r$.
+
+```{r}
+
+Rh_rn=Ph/Th_rn[names(Ph)] #Ph is the population estimate by regio, which is the only one we have
+par(mar=c(6,6,4,1))
+barplot(Rh_rn,main="Region-depend pop/site ratio counts",ylab=expression(frac(P[haiji],T[haiji])),las=3,col=adjustcolor("blue",.4))
+```
+
+Estimate the population for the Yayoi Period using the new site count and the ratio computed before
+
+```{r}
+Ty=newcounts$弥生
+names(Ty)=newcounts$Translation
+Py=Ty * Rh_rn[ newcounts$Region.alt] * 1/3
+names(Py)=newcounts$Translation
+barplot(Py,las=3,main="population estimate by prefecture using new counts")
+```
+
+We can now group these estimates by region and rice area:
+
+```{r,out.width="45%",fig,show="hold"}
+Pya=tapply(Py,a[names(Ty)],sum)
+Pyr=tapply(Py,newcounts$Region.alt,sum)
+barplot(Pyr,col=adjustcolor("red",.3),main="Population Estimates by Region",las=3)
+barplot(Pya[-1],col=adjustcolor("blue",.3),main="Population Estimates by Rice Area",las=3)
+```
+
+If we compare to the previous estimation at the region level:
+```{r}
+col=adjustcolor(c("#8DD3C7","#FFFFB3","#BEBADA","#FB8072", "#80B1D3"),.8)
+pop_yayoi=rbind(pop_yayoi,newcouts=Pyr[colnames(pop_yayoi)])
+barplot(pop_yayoi,beside=T,log="y",col=col,main="Population Estimates by Regions",las=3)
+legend("topleft",legend=rownames(pop_yayoi),fill=col)
+```
+
+Compare the raw Fujio's count per Area with these one:
+
+```{r}
+fujio=c(1639,495,2570,3973,3547,1183,319,116)
+names(fujio)=paste0("Area",1:8)
+newsitecount=tapply(newcounts$弥生,a[newcounts$Translation],sum)
+newsitecount=newsitecount[names(fujio)]
+
+barplot(rbind(new=newsitecount,fujio),beside=T,legend=T)
+par(xpd=NA)
+plot(newsitecount,fujio,pch=21,bg=adjustcolor(2,.6))
+text(newsitecount,fujio,names(fujio),pos=3)
+```
+
+
+## Correct by period:
+
+
+```{r}
+
+correct_perdiod=read.csv("yayoiduration.csv")
+Cyh=1000/abs(sapply(gsub("BC","-",correct_perdiod[3:9]),function(i)eval(parse(text=i))))
+names(Cyh)=colnames(correct_perdiod)[3:9]
+
+
+```
 
