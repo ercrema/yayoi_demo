@@ -232,6 +232,12 @@ plot(newsitecount,fujio,pch=21,bg=adjustcolor(2,.6))
 text(newsitecount,fujio,names(fujio),pos=3)
 ```
 
+Compare to after yayoi:
+```{r}
+ barplot(rbind(Yayoi=Pyr,H=Ph[names(Pyr)]),beside=T,log="y")
+ barplot(Ph[names(Pyr)]/Pyr)
+
+```
 
 ## Correct by period:
 
@@ -239,9 +245,48 @@ text(newsitecount,fujio,names(fujio),pos=3)
 ```{r}
 
 correct_perdiod=read.csv("data/yayoiduration.csv")
-Cyh=1000/abs(sapply(gsub("BC","-",correct_perdiod[3:9]),function(i)eval(parse(text=i))))
-names(Cyh)=colnames(correct_perdiod)[3:9]
+Dyh=1000/abs(sapply(gsub("BC","-",correct_perdiod[3:9]),function(i)eval(parse(text=i))))
+names(Dyh)=colnames(correct_perdiod)[3:9]
 
 
 ```
+
+
+Then we can normalise our previous calculation with this $D_{yh}$ per region
+
+```{r}
+
+Py=Ty * Rh_rn[ newcounts$Region.alt] * 1/3 *  Dyh[newcounts$Region.time]
+names(Py)=newcounts$Translation
+
+Pya=tapply(Py,a[names(Ty)],sum)
+Pyr=tapply(Py,newcounts$Region.alt,sum)
+
+
+pop_yayoi=rbind(pop_yayoi,timeadj=Pyr[colnames(pop_yayoi)])
+barplot(pop_yayoi,beside=T,legend=T)
+pop_yayoi=pop_yayoi[,-1]
+col=adjustcolor(c("#8DD3C7","#FFFFB3","#BEBADA","#FB8072","#80B1D3","#FDB462"),.8)
+barplot(pop_yayoi,beside=T,log="y",col=col,las=3)
+legend("topleft",legend=rownames(pop_yayoi),fill=col,cex=.6,ncol=2)
+
+main.col <- c(rgb(51,34,136,maxColorValue=255),rgb(136,204,238,maxColorValue = 255),rgb(68,170,153,maxColorValue = 255),rgb(17,119,51,maxColorValue = 255),rgb(153,153,51,maxColorValue = 255),rgb(221,204,119,maxColorValue = 255),rgb(204,102,119,maxColorValue = 255),rgb(136,34,85,maxColorValue = 255))
+
+cols=RColorBrewer::brewer.pal(8,"Set2")
+barplot(Pyr,col=adjustcolor("red",.3),main="Population Estimates by Region",las=3)
+barplot(Pya[-1],col=cols,main="Population Estimates by Rice Area",las=3)
+
+s=newcounts
+s$Prefecture=newcounts$Translation
+s=merge(s,areas,by="Prefecture")
+s=tapply(s$Area.x,s$Area.y,sum)
+barplot(Pya[-1]/s[names(Pya[-1])],col=cols,main="Population Estimates by Rice Area/aea size",las=3)
+
+```
+
+The Equation is thus:
+
+$P_{yayoi,a}=\displaystyle\sum_{x \in a}\left({\frac{P_{haji,r_x}}{P_{haji,r_x}} \times T_{yayoi,x} \times C_{yayoi,x} \times \frac{D_{haji,r'_x}}{D_{yayoi,r'_x}}}\right)$
+
+where $r_x$ an $r'_x$  are broader region that include x ,for which information is available (on population estimate or length in year of the yayoi period)
 
