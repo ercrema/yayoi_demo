@@ -35,10 +35,10 @@ $P_j = S_h/P_h * S_j$
 The example below is the one used for the Middle Jomon (originally J3) period:
 
 ```{r}
-Ph=9443300
+Ph_r_k84=9443300
 Sh=5549
 Sj=3977 #for middle Jomon
-Pj = Ph/Sh * Sj
+Pj = Ph_r_k84/Sh * Sj
 
 ```
 
@@ -55,30 +55,35 @@ From his own words:
 
 > Kanto yielded a total of $3,977$ Jomon 3 sites and 5,549 Haji sites. The eighth century population of this area is calculated at 943,300. Therefbre, the value of a Haji site is 170 (VH=943,OOO÷5,549). The ratio of Jomon 3 to Haji site is .71 $(T_{j3}÷T_h==3,977÷5,549)$. If we assume an equal value for Jomon and Haji sites, the population of Jomon 3 in Kanto becomes $676,068 (.71 \time 943,300)$. Since a Jomon 3 site is actually valued at 1/5 or 1/7 of a Haji site, the maximum population, when $1/5$ is used as the constant, is $135,214$.
 
+Note: Koyama use $T_x$ instead of $S_x$ we will stick to $S_x$ for the number of Site ; I also use $R_x$ as the ratio Population per sites ($\frac{P_x}{S_x}$)
 
-If we take back his numbers. `ksn` store is table with the number of settlements counted for each prefectures (is table 2 from his paper 1978) .  `groupedsite` is the table 3 where site are grouped dby region, we can alread see there don't match if we manually add them, probably because of typo
+
+If we take back his numbers. `ksn` store his table with the number of settlements counted for each prefectures (is table 2 from his paper 1978) .  `groupedsite` is the table 3 where site are grouped dby region, we can alread see there don't match if we manually add them, probably because of typo
+
 ```{r}
 ksn=read.csv("data/koyama78sitenumber.csv")
 groupedsite=read.csv("data/koyama78groupedsn.csv",row.names=1)
-yayoiGSN=groupedsite$Yayoi.Total
-names(yayoiGSN)=rownames(groupedsite)
-yayoiRecGSN=tapply(ksn$Yayoi.Total,ksn$Region,sum,na.rm=T)
-n=names(yayoiRecGSN)
-yayoiGSN[n]-yayoiRecGSN[n]
+Sy_r_k=groupedsite$Yayoi.Total # number of site per regioi
+names(Sy_r_k)=rownames(groupedsite) 
+Sy_p=ksn$Yayoi.Total ##number of site per prefecture
+Sy_r_kb=tapply(Sy_p,ksn$Region,sum,na.rm=T) #site per region bis
+n=names(Sy_r_kb) 
+Sy_r_k[n]-Sy_r_kb[n]
 ```
 
 Let's recompute the Jomon population for all regions using Kanto's medevial population and site counts as reference. Koyama's 
 
 ```{r}
-Th=sum(ksn$Haji.Total[ ksn$Region == "Kanto"])
-Tj=sum(ksn$J.3[ ksn$Region == "Kanto"],na.rm=T)
+Sh_p_k=ksn$Haji.Total
+Sh_kanto=sum(Sh_p_k[ ksn$Region == "Kanto"])
+Sj=sum(ksn$J.3[ ksn$Region == "Kanto"],na.rm=T)
 regmatches=read.csv("data/prefecture_region_match.csv")
 trad=readRDS("../encounter_data/traductionRegion.RDS")
 
 #number of site during yayoi:
-Ty=yayoiRecGSN[n]
-pop_yayoi=Ty*(943000/Th)*1/3
-pop_yayoi=rbind(pop_yayoi,Ty*(943300/Th)*1/3)
+Sy=Sy_r_kb[n]
+pop_yayoi=Sy*(943000/Sh_kanto)*1/3
+pop_yayoi=rbind(pop_yayoi,Sy*(943300/Sh_kanto)*1/3)
 rownames(pop_yayoi)=c("943,000","943,300")
 barplot(pop_yayoi,las=3,beside=T,legend=T)
 
@@ -94,8 +99,8 @@ regions=sapply(kps[-nrow(kps),1],function(i,trad)names(trad)[trad==i],trad=trad)
 regions["近畿"]="Kinki"
 kps$reg_en =NA
 kps$reg_en[1:9] =unlist(regions)
-kpsy=kps[,"弥生"]
-names(kpsy)=kps$reg_en
+Py_r_k84=kps[,"弥生"]
+names(Py_r_k84)=kps$reg_en
 pop_yayoi=rbind(pop_yayoi,K84=kpsy[colnames(pop_yayoi)])
 
 barplot(pop_yayoi,las=3,beside=T,legend=T,main="pop estimate, fixed ratio, 3 versions")
@@ -106,16 +111,17 @@ barplot(pop_yayoi,las=3,beside=T,legend=T,main="pop estimate, fixed ratio, 3 ver
 Still using Koyama sites counts but refining to use a ratio region-depent:
 
 ```{r,out.width="45%"}
-Ph=kps[,"土師"]
-names(Ph)=kps$reg_en
-hajiRecGSN=tapply(ksn$Haji.Total,ksn$Region,sum,na.rm=T)
-Cyh=(Ph[names(hajiRecGSN)]/hajiRecGSN)
-Cyh[is.infinite(Cyh)]=Cyh["Kanto"]
-varPop=Ty*Cyh*1/3
-pop_yayoi=rbind(pop_yayoi,varpop=varPop)
+Ph_r_k84=kps[,"土師"]
+names(Ph_r_k84)=kps$reg_en
+Sh_p_kb=ksn$Haji.Total
+Sh_r_kb=tapply(Sh_p_kb,ksn$Region,sum,na.rm=T)
+Rh_r_kb=(Ph_r_k84[names(Sh_r_kb)]/Sh_r_kb) #Ratio pop per region using Koyama's site count
+Rh_r_kb[is.infinite(Rh_r_kb)]=Rh_r_kb["Kanto"] #when unkown use kanto's ratio
+Py_r_kb=Sy_r_kb*Rh_r_kb*1/3
+pop_yayoi=rbind(pop_yayoi,"Varying Ratio"=Py_r_kb)
 barplot(pop_yayoi,beside=T,legend=T)
 pop_yayoi=pop_yayoi[,-1]
-col=adjustcolor(c("#8DD3C7","#FFFFB3","#BEBADA","#FB8072"),.8)
+col=adjustcolor(palette.colors(nrow(pop_yayoi),"Set 2"),.8)
 
 barplot(pop_yayoi,beside=T,log="y",col=col,las=3)
 legend("topleft",legend=rownames(pop_yayoi),fill=col)
@@ -127,25 +133,25 @@ Looking at the prefecture level:
 
 
 ```{r}
-Th_p=ksn$Haji.Total
-names(Th_p)=ksn$Region
-Ty_p=ksn$Yayoi.Total
-names(Ty_p)=ksn$Prefecture
+names(Sh_p_kb)=ksn$Region #we will use the regio to get back the ratio
+Sy_p_k=ksn$Yayoi.Total
+names(Sy_p_k)=ksn$Prefecture
 
-Rh_p=Ph[ksn$Region]/Th_p
-Rh_p[is.na(Rh_p)]=Ph["Kanto"]/Th_p["Kanto"]
-Py_p=Ty_p * Rh_p * 1/3
-barplot(Py_p,las=3,log="y",main="pop estimate per pref, Koyama counts")
+Rh_p_k=Rh_r_kb[ksn$Region]
+Rh_p_k[is.na(Rh_p_k)]=Rh_r_kb["Kanto"] ##should be used now as this is done before
+Py_p_k=Sy_p_k * Rh_p_k * 1/3
+names(Py_p_k)=ksn$Prefecture
+barplot(Py_p_k,las=3,log="y",main="pop estimate per pref, Koyama counts")
 ```
 
 Grouping these prefecture by Rice Area:
 
 ```{r}
 areas=read.csv("data/prefecture_region_match.csv")
-a=(areas$Area)
+a=areas$Area #handy dict
 names(a)=areas$Prefecture
-ksn=merge(areas,ksn,by="Prefecture")
-Ty_a=tapply(ksn$Yayoi.Total,ksn$Area,sum,na.rm=T)
+ksn=merge(areas,ksn,by="Prefecture") # add area to Koyama original table
+Sy_a_k=tapply(ksn$Yayoi.Total,ksn$Area,sum,na.rm=T) # Site count by area using koyama counts
 ```
 
 ## Using new settlement count
@@ -156,18 +162,21 @@ Now using new settlements counts ; we first compare the sites counts ; at the Pr
 newcounts =read.csv("data/siteperprefperiod_cleaned.csv")
 trans=read.csv("data/prefectures_translations.csv")
 newcounts=merge(newcounts,trans,by=1)
-Ty_pnew=newcounts$弥生
-names(Ty_pnew)=newcounts$Translation
-barplot(rbind(updated=Ty_pnew,Koyama=Ty_p[names(Ty_pnew)]),col=adjustcolor(1:2,.7),legend=T,beside=T,las=3,main="Number of settlement per prefecture for Yayoi Period")
+Sy_p_n=newcounts$弥生 #site count per prefercture, new counts
+names(Sy_p_n)=newcounts$Translation
+barplot(rbind(updated=Sy_p_n,Koyama=Sy_p_k[names(Sy_p_n)]),col=adjustcolor(1:2,.7),legend=T,beside=T,las=3,main="Number of settlement per prefecture for Yayoi Period")
+d=Sy_p_n-Sy_p_k[names(Sy_p_n)]
+d[is.na(d)]=Sy_p_n[names(d[is.na(d)])]
+barplot(d,col=ifelse(d>0,1,2),las=3,)
 ```
 
-### Site per region and population esetimate:
+### Site per region and population estimate:
 
-Compute $T_{h,r}$, for each  region $r$ the total number of site during $h$ Haji period using this new dataset and $T_{y,r}$  the same for Yayoi period
+Compute $S_{h,r}$, for each  region $r$ as the total number of site during $h$ Haji period using this new dataset and $S_{y,r}$  the same for Yayoi period
 
 ```{r}
-Th_pnew=newcounts$古墳+newcounts$古代
-Th_rn=tapply(Th_pnew,newcounts$Region.alt,sum)
+Sh_p_n=newcounts$古墳+newcounts$古代
+Sh_r_n=tapply(Sh_p_n,newcounts$Region.alt,sum)
 
 ```
 
@@ -175,48 +184,69 @@ Does the count really correlate with the popualtion estimates?
 
 ```{r}
 par(xpd=NA)
-plot(Th_rn,Ph[names(Th_rn)],log="y",pch=21,bg=adjustcolor(2,.5),ylab="Population Estimate",xlab="Site count")
-text(Th_rn,Ph[names(Th_rn)],labels = names(Th_rn),pos=3)
+plot(Sh_r_n,Ph_r_k84[names(Sh_r_n)],log="y",pch=21,bg=adjustcolor(2,.5),ylab="Population Estimate",xlab="Site count")
+text(Sh_r_n,Ph_r_k84[names(Sh_r_n)],labels = names(Sh_r_n),pos=3)
 ```
 
 
 ### Ratio Population/Site
 
-Compute the ratio $R_{h,r}=\frac{P_{h,r}}{T_{h,r}}$, $T_{h,r}$ the number of site for region r during haji period, $P_{h,r}$ the population estimate during haji period for the region $r$.
+Compute the ratio $R_{h,r}=\frac{P_{h,r}}{S_{h,r}}$, $S_{h,r}$ the number of site for region r during haji period, $P_{h,r}$ the population estimate during haji period for the region $r$.
 
 ```{r}
 
-Rh_rn=Ph/Th_rn[names(Ph)] #Ph is the population estimate by regio, which is the only one we have
+Rh_r_n=Ph_r_k84/Sh_r_n[names(Ph_r_k84)] #Ph_r_k84 is the population estimate by regio, which is the only one we have
 par(mar=c(6,6,4,1))
-barplot(Rh_rn,main="Region-depend pop/site ratio counts",ylab=expression(frac(P[haiji],T[haiji])),las=3,col=adjustcolor("blue",.4))
+barplot(Rh_r_n,main="Region-depend pop/site ratio counts",ylab=expression(frac(P[haiji],T[haiji])),las=3,col=adjustcolor("blue",.4))
 ```
 
-Estimate the population for the Yayoi Period using the new site count and the ratio computed before
+Estimate the population per prefecture for the Yayoi Period using the new site count and the ratio computed before
 
 ```{r}
-Ty=newcounts$弥生
-names(Ty)=newcounts$Translation
-Py=Ty * Rh_rn[ newcounts$Region.alt] * 1/3
-names(Py)=newcounts$Translation
-barplot(Py,las=3,main="population estimate by prefecture using new counts")
+Sy_p_n=newcounts$弥生
+names(Sy_p_n)=newcounts$Translation
+Py_p_n=Sy_p_n * Rh_r_n[ newcounts$Region.alt] * 1/3
+names(Py_p_n)=newcounts$Translation
+barplot(Py_p_n,las=3,main="population estimate by prefecture using new counts")
 ```
 
 We can now group these estimates by region and rice area:
 
 ```{r,out.width="45%",fig,show="hold"}
-Pya=tapply(Py,a[names(Ty)],sum)
-Pyr=tapply(Py,newcounts$Region.alt,sum)
-barplot(Pyr,col=adjustcolor("red",.3),main="Population Estimates by Region",las=3)
-barplot(Pya[-1],col=adjustcolor("blue",.3),main="Population Estimates by Rice Area",las=3)
+Py_a_n=tapply(Py_p_n,a[names(Py_p_n)],sum)
+Py_r_n=tapply(Py_p_n,newcounts$Region.alt,sum)
+Ty_r_n=tapply(Sy_p_n,newcounts$Region.alt,sum)
+barplot(Py_r_n,col=adjustcolor("red",.3),main="Population Estimates by Region",las=3)
+barplot(Py_a_n[-1],col=adjustcolor("blue",.3),main="Population Estimates by Rice Area",las=3)
 ```
 
 If we compare to the previous estimation at the region level:
 ```{r}
-col=adjustcolor(c("#8DD3C7","#FFFFB3","#BEBADA","#FB8072", "#80B1D3"),.8)
-pop_yayoi=rbind(pop_yayoi,newcouts=Pyr[colnames(pop_yayoi)])
+col=adjustcolor(palette.colors(nrow(pop_yayoi),"Set 2"),.8)
+pop_yayoi=rbind(pop_yayoi,"New Counts,Varying Ratio"=Py_r_n[colnames(pop_yayoi)])
 barplot(pop_yayoi,beside=T,log="y",col=col,main="Population Estimates by Regions",las=3)
 legend("topleft",legend=rownames(pop_yayoi),fill=col)
 ```
+
+How varying the ratio per region compare to his fixed ratio from Kanto? the obvious problem is that Koyama's site count for Kanto is: `Sh` whereas the new count are `Sh_r_n["Kanto"]`
+
+```{r}
+Sy_r_n=tapply(newcounts[,"弥生"],newcounts$Region.alt,sum)
+pop_yayoi=rbind(pop_yayoi,"New Counts,Fixed Ratio"=Rh_r_n["Kanto"]*Sy_r_n[colnames(pop_yayoi)]*1/3)
+col=adjustcolor(palette.colors(nrow(pop_yayoi),"Set 2"),.8)
+barplot(pop_yayoi[c(1,3,4,5,6),],beside=T,col=col,main="Population Estimates by Regions",las=3)
+legend("topleft",legend=rownames(pop_yayoi)[c(1,3,4,5,6)],fill=col[c(1,3,4,5,6)])
+
+```
+
+Comparing site counts:
+
+
+```{r}
+Sy
+```
+
+### Fujio Sites counts:
 
 Compare the raw Fujio's count per Area with these one:
 
@@ -234,8 +264,8 @@ text(newsitecount,fujio,names(fujio),pos=3)
 
 Compare to after yayoi:
 ```{r}
- barplot(rbind(Yayoi=Pyr,H=Ph[names(Pyr)]),beside=T,log="y")
- barplot(Ph[names(Pyr)]/Pyr)
+ barplot(rbind(Yayoi=Py_r_n,H=Ph_r_k84[names(Py_r_n)]),beside=T,log="y")
+ barplot(Ph_r_k84[names(Py_r_n)]/Py_r_n)
 
 ```
 
@@ -256,37 +286,48 @@ Then we can normalise our previous calculation with this $D_{yh}$ per region
 
 ```{r}
 
-Py=Ty * Rh_rn[ newcounts$Region.alt] * 1/3 *  Dyh[newcounts$Region.time]
-names(Py)=newcounts$Translation
+Py_p_nd=Sy_p_n * Rh_r_n[ newcounts$Region.alt] * 1/3 *  Dyh[newcounts$Region.time]
+names(Py_p_nd)=newcounts$Translation
 
-Pya=tapply(Py,a[names(Ty)],sum)
-Pyr=tapply(Py,newcounts$Region.alt,sum)
+Py_a_nd=tapply(Py_p_nd,a[names(Sy_p_n)],sum)
+Py_r_nd=tapply(Py_p_nd,newcounts$Region.alt,sum)
 
 
-pop_yayoi=rbind(pop_yayoi,timeadj=Pyr[colnames(pop_yayoi)])
-barplot(pop_yayoi,beside=T,legend=T)
+pop_yayoi=rbind(pop_yayoi,"New count, time adjusted"=Py_r_nd[colnames(pop_yayoi)])
 pop_yayoi=pop_yayoi[,-1]
-col=adjustcolor(c("#8DD3C7","#FFFFB3","#BEBADA","#FB8072","#80B1D3","#FDB462"),.8)
-barplot(pop_yayoi,beside=T,log="y",col=col,las=3)
-legend("topleft",legend=rownames(pop_yayoi),fill=col,cex=.6,ncol=2)
+col=adjustcolor(palette.colors(nrow(pop_yayoi),"Set 2"),.8)
+barplot(pop_yayoi,beside=T,log="y",col=col,las=3,legend=T,args.legend = list(x="topleft",cex=.6,ncol=2))
+
+```
+
+
+Selecting a subset of the models:
+```{r}
+selected=pop_yayoi[c(3,6,5,7),]
+col=adjustcolor(palette.colors(nrow(selected),"Set 2"),.8)
+barplot(selected,beside=T,col=col,las=3,legend=T,args.legend = list(x="topleft",cex=.6,ncol=2))
+```
+
+
+```{r}
 
 main.col <- c(rgb(51,34,136,maxColorValue=255),rgb(136,204,238,maxColorValue = 255),rgb(68,170,153,maxColorValue = 255),rgb(17,119,51,maxColorValue = 255),rgb(153,153,51,maxColorValue = 255),rgb(221,204,119,maxColorValue = 255),rgb(204,102,119,maxColorValue = 255),rgb(136,34,85,maxColorValue = 255))
 
 cols=RColorBrewer::brewer.pal(8,"Set2")
-barplot(Pyr,col=adjustcolor("red",.3),main="Population Estimates by Region",las=3)
-barplot(Pya[-1],col=cols,main="Population Estimates by Rice Area",las=3)
+barplot(Py_r_nd,col=adjustcolor("red",.3),main="Population Estimates by Region",las=3)
+barplot(Py_a_nd[-1],col=cols,main="Population Estimates by Rice Area",las=3)
 
 s=newcounts
 s$Prefecture=newcounts$Translation
 s=merge(s,areas,by="Prefecture")
 s=tapply(s$Area.x,s$Area.y,sum)
-barplot(Pya[-1]/s[names(Pya[-1])],col=cols,main="Population Estimates by Rice Area/aea size",las=3)
+barplot(Py_a_nd[-1]/s[names(Py_a_nd[-1])],col=cols,main="Population Estimates by Rice Area/aea size",las=3)
 
 ```
 
 The Equation is thus:
 
-$P_{yayoi,a}=\displaystyle\sum_{x \in a}\left({\frac{P_{haji,r_x}}{P_{haji,r_x}} \times T_{yayoi,x} \times C_{yayoi,x} \times \frac{D_{haji,r'_x}}{D_{yayoi,r'_x}}}\right)$
+$P_{yayoi,a}=\displaystyle\sum_{x \in a}\left({\frac{P_{haji,r_x}}{S_{haji,r_x}} \times S_{yayoi,x} \times C_{yayoi,x} \times \frac{D_{haji,r'_x}}{D_{yayoi,r'_x}}}\right)$
 
 where $r_x$ an $r'_x$  are broader region that include x ,for which information is available (on population estimate or length in year of the yayoi period)
 
