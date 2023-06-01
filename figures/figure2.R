@@ -2,7 +2,6 @@
 library(here)
 library(nimbleCarbon)
 library(rcarbon)
-source(here('src','unif2.R'))
 load(here('data','sitedata.RData'))
 load(here('data','c14data.RData'))
 
