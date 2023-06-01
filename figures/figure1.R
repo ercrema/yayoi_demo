@@ -10,12 +10,11 @@ library(rgeos)
 load(here('data','c14data.RData'))
 win  <- ne_countries(scale=10)
 japan <- ne_states(country = "japan") |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
-df.pref.reg <- read.csv(here('data','prefecture_region_match.csv'))
-japan@data <- left_join(japan@data,df.pref.reg,by=c('name'='Prefecture'))
+df.pref.reg <- read.csv(here('data','prefecture_data.csv'))
+japan@data <- left_join(japan@data,df.pref.reg,by=c('name_ja'='JpNames'))
 japan <- gUnaryUnion(japan,id=japan@data$Area)
 japan.sf <- as(japan,'sf')
-win <- gUnaryUnion(win,id=win@data[,1])
-
+win <- gUnaryUnion(win,id=win@data$featurecla)
 
 c14sites  <- subset(c14db,Yayoi==T|D500==T|D750==T) |> select(Longitude,Latitude) |> unique() |> st_as_sf(x=_,coords=c('Longitude','Latitude'),crs=4326)
 
