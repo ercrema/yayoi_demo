@@ -160,6 +160,7 @@ Now using new settlements counts ; we first compare the sites counts ; at the Pr
 
 ```{r,fig.lab="Site count at prefetur level"}
 newcounts =read.csv("data/siteperprefperiod_cleaned.csv")
+newcounts=newcounts[!(newcounts %in% c("沖縄県","北海道")),]
 trans=read.csv("data/prefectures_translations.csv")
 newcounts=merge(newcounts,trans,by=1)
 Sy_p_n=newcounts$弥生 #site count per prefercture, new counts
@@ -321,7 +322,7 @@ s=newcounts
 s$Prefecture=newcounts$Translation
 s=merge(s,areas,by="Prefecture")
 s=tapply(s$Area.x,s$Area.y,sum)
-barplot(Py_a_nd[-1]/s[names(Py_a_nd[-1])],col=cols,main="Population Estimates by Rice Area/aea size",las=3)
+barplot(Py_a_nd[-1]/s[names(Py_a_nd[-1])],col=cols,main="Population Density (hab/km²) for each Rice Area",las=3)
 
 ```
 
