@@ -25,15 +25,37 @@ Absolute population estimates were calculated using a modified version of equati
 ## File Structure
 
 ### data
-
+ * `c14data.RData`
+ * `c14db_1.0.0.Rds`
+ * `c14raw_1.0.0.Rds`
+ * `data_prep_c14.R`
+ * `data_prep_sites.R`
+ * `data_summary.R`
+ * `koyama_popestimate_1984.csv`
+ * `maizobunkazai_2017.csv`
+ * `prefecture_data.csv`
+ * `sitedata.RData`
+ * `site_raw.csv`
+   
 ### analyses
+ * `icar500.R`
+ * `icar750.R`
+ * `pop_dens_est.R`
 
 ### results
-
+ * `icar_c14doubleRes500.RData`
+ * `icar_c14doubleRes750.RData`
+ * `pop_estimate_compare.csv`
+ * `pop_estimate_region.csv`
+   
 ### figures
-
+ * `figures_main.R`
+ * `figures_esm.R`
+ * `figure1.pdf` ~ `figure6.pdf`
+ * `figureS1.pdf` ~ `figureS3.pdf`
+ 
 ### src
-
+* `dbscanID.R`
 
 ## R Session Info
 
