@@ -158,12 +158,13 @@ chronos$s[i] = 15
 d <- left_join(d,select(chronos,entry,m,s,start,end),by=c("Chronology"="entry"))
 
 # Identify Prefectures ----
-prefTrans  <- read.csv(here('data','prefectures_translations.csv'))
+# prefTrans  <- read.csv(here('data','prefectures_translations.csv'))
+prefTrans <- read.csv(here('data','prefecture_data.csv'))
 d$Prefecture  <- NA
 
 for(i in 1:nrow(prefTrans))
 {
-	d$Prefecture[grep(prefTrans$JpNames[i],d$Address)]  <- prefTrans$Translation[i]
+	d$Prefecture[grep(prefTrans$JpNames[i],d$Address)]  <- prefTrans$PrefectureEn[i]
 }
 
 # Eliminate cases without Address and Lat/Lon
@@ -179,28 +180,19 @@ d$Prefecture[ii]  <- jp$name[as.numeric(st_intersects(check.sites,jp))]
 d <- subset(d,!is.na(Prefecture))
 
 # Assign Region
-d  <- left_join(d, prefTrans, by=c('Prefecture'='Translation'))
-d$Area <- NA
-d$Area[which(d$Prefecture%in%c('Fukuoka','Saga','Nagasaki'))]  <- "I"
-d$Area[which(d$Prefecture%in%c('Oita','Miyazaki','Kagoshima','Kumamoto'))]  <- "II"
-d$Area[which(d$Prefecture%in%c('Ehime','Kochi')|d$Region=='Chugoku')]  <- "III"
-d$Area[which(d$Prefecture%in%c('Kagawa','Tokushima')|d$Region=='Kansai')]  <- 'IV'
-d$Area[which(d$Prefecture%in%c('Kanagawa')|d$Region=='Chubu')]  <- "V"
-d$Area[which(d$Prefecture%in%c('Saitama','Gunma','Tokyo','Chiba','Tochigi','Ibaraki'))]  <- "VI"
-d$Area[which(d$Prefecture%in%c('Yamagata','Fukushima','Miyagi','Iwate','Akita'))]  <- "VII"
-d$Area[which(d$Prefecture%in%c('Aomori'))]  <- "VIII"
-
+d  <- left_join(d, prefTrans, by=c('Prefecture'='PrefectureEn'))
 d  <- subset(d,!is.na(Area))
 
+# Add arrival dates from Crema et al 2022 (10.1126/sciadv.adc9171), median posterior arrival dates of model b, table S4
 d$ricearrival <- NA
-d$ricearrival[d$Area=='I']  <- BCADtoBP(-1039)
-d$ricearrival[d$Area=='II']  <- BCADtoBP(-570)
-d$ricearrival[d$Area=='III']  <- BCADtoBP(-910)
-d$ricearrival[d$Area=='IV']  <- BCADtoBP(-824)
-d$ricearrival[d$Area=='V']  <- BCADtoBP(-648)
-d$ricearrival[d$Area=='VI']  <- BCADtoBP(-271)
-d$ricearrival[d$Area=='VII']  <- BCADtoBP(-152)
-d$ricearrival[d$Area=='VIII']  <- BCADtoBP(-428)
+d$ricearrival[d$Area=='Area1']  <- BCADtoBP(-1039)
+d$ricearrival[d$Area=='Area2']  <- BCADtoBP(-570)
+d$ricearrival[d$Area=='Area3']  <- BCADtoBP(-910)
+d$ricearrival[d$Area=='Area4']  <- BCADtoBP(-824)
+d$ricearrival[d$Area=='Area5']  <- BCADtoBP(-648)
+d$ricearrival[d$Area=='Area6']  <- BCADtoBP(-271)
+d$ricearrival[d$Area=='Area7']  <- BCADtoBP(-152)
+d$ricearrival[d$Area=='Area8']  <- BCADtoBP(-428)
 
 sitedb  <- d
 
