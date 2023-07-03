@@ -292,8 +292,6 @@ load(here('data','c14data.RData'))
 load(here('results','icar_c14doubleRes500.RData'))
 load(here('results','icar_c14doubleRes750.RData'))
 
-
-# Delta Plot ----
 post.bar <- function(x,i,h=0.4,col)
 {
 	require(grDevices)
@@ -341,7 +339,9 @@ for (i in 1:8)
 axis(2,at=iseq.a-0.5,labels = c('I','II','III','IV','V','VI','VII','VIII'),las=2)
 axis(1)
 abline(v=0,lty=3)
-legend('topright',legend=c('750yrs window','500yrs window'),fill=c(col2,col1),bty='n')
+rect(xleft=0.43,xright=0.85,ybottom=14,ytop=24.5,border=NA,col='white')
+legend(x=0.45,y=24,legend=c('95% HPD','80% HPD','50% HPD'),fill=c(adjustcolor(col2,alpha.f = 0.9),adjustcolor(col2,alpha.f = 0.6),adjustcolor(col2,alpha.f = 0.3)),title='750 yrs window',bty='n',bg='white',cex=0.9)
+legend(x=0.45,y=19,legend=c('95% HPD','80% HPD','50% HPD'),fill=c(adjustcolor(col1,alpha.f = 0.9),adjustcolor(col1,alpha.f = 0.6),adjustcolor(col1,alpha.f = 0.3)),title='500 yrs window',bty='n',bg='white',cex=0.9)
 box()
 mtext(text=TeX(r'($\Delta r)'),side=1,line=2.5)
 mtext(text='Area',side=2,line=2.5)
