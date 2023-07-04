@@ -9,9 +9,10 @@ library(spdep)
 source(here('src','dbscanID.R'))
 
 # Read 14C Data ----
-c14db  <- readRDS(here('data','c14db_1.0.0.Rds'))
-c14db.raw  <- readRDS(here('data','c14raw_1.0.0.Rds')) |> subset(toKeep==TRUE) |> select(LabCode,SamplingLocation)
-c14db  <- left_join(c14db,c14db.raw)
+c14db  <- read.csv(here('data','rekihaku_downloads','c14db_1.0.0.csv'))
+c14db.raw  <- read.csv(here('data','rekihaku_downloads','binded.csv')) 
+c14db  <- left_join(c14db,c14db.raw.1)
+c14db <- left_join(c14db,c14db.raw.2,by=c('LabCode'='LabCode'))
 
 # Subset to Key Regions ----
 c14db <- subset(c14db,!is.na(Latitude)&!is.na(Longitude)&!Prefecture%in%c('Hokkaido','Okinawa'))
