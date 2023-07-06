@@ -8,6 +8,7 @@ library(dplyr)
 library(latex2exp)
 library(nimbleCarbon)
 library(rcarbon)
+library(coda)
 
 # Figure 1 ----
 load(here('data','c14data.RData'))
@@ -217,8 +218,8 @@ load(here('results','icar_c14doubleRes750.RData'))
 
 icar.res.c14.500  <-  icar.c14double500[,1:16] * 100
 icar.res.c14.750  <-  icar.c14double750[,1:16] * 100
-res500  <- apply(icar.res.c14.500,2,quantile,c(0.05,0.95))
-res750  <- apply(icar.res.c14.750,2,quantile,c(0.05,0.95))
+res500  <- apply(icar.res.c14.500,2,function(x){HPDinterval(as.mcmc(x),0.95)})
+res750  <- apply(icar.res.c14.750,2,function(x){HPDinterval(as.mcmc(x),0.95)})
 
 ricearrival = data.frame(regions=1:8,m = BCADtoBP(c(-1039,-570,-910,-824,-648,-271,-152,-428)))
 
@@ -295,7 +296,8 @@ load(here('results','icar_c14doubleRes750.RData'))
 post.bar <- function(x,i,h=0.4,col)
 {
 	require(grDevices)
-	blocks  <- quantile(x,prob=c(0.025,0.1,0.25,0.75,0.9,0.975))
+	x  <- as.mcmc(x)
+	blocks <- c(HPDinterval(x,0.95)[1],HPDinterval(x,0.8)[1],HPDinterval(x,0.5)[1],HPDinterval(x,0.5)[2],HPDinterval(x,0.8)[2],HPDinterval(x,0.95)[2])
 	rect(xleft=blocks[1],xright=blocks[2],ybottom=i-h/5,ytop=i+h/5,border=NA,col=adjustcolor(col,alpha.f=0.3))
 	rect(xleft=blocks[2],xright=blocks[3],ybottom=i-h/5,ytop=i+h/5,border=NA,col=adjustcolor(col,alpha.f=0.6))
 	rect(xleft=blocks[3],xright=blocks[4],ybottom=i-h/5,ytop=i+h/5,border=NA,col=adjustcolor(col,alpha.f=0.9))
