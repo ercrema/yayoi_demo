@@ -11,8 +11,7 @@ source(here('src','dbscanID.R'))
 # Read 14C Data ----
 c14db  <- read.csv(here('data','rekihaku_downloads','c14db_1.0.0.csv'))
 c14db.raw  <- read.csv(here('data','rekihaku_downloads','binded.csv')) 
-c14db  <- left_join(c14db,c14db.raw.1)
-c14db <- left_join(c14db,c14db.raw.2,by=c('LabCode'='LabCode'))
+c14db <- left_join(c14db,c14db.raw,by=c('LabCode'='LabCode'))
 
 # Subset to Key Regions ----
 c14db <- subset(c14db,!is.na(Latitude)&!is.na(Longitude)&!Prefecture%in%c('Hokkaido','Okinawa'))
@@ -69,7 +68,7 @@ c14db$anthropic = grepl(paste(anthropicGrep,collapse="|"),c14db$SamplingLocation
 c14db  <- subset(c14db,anthropic==TRUE)
 # Spatial Data -----
 # Prefecture Based
-win <- ne_states(country = "japan",returnclass = 'sf') |> subset(!name_vi %in% c("Okinawa","Hokkaido"))
+win <- ne_states(country = "japan",returnclass = 'sf') |> subset(!name_vi %in% c("Okinawa","Hokkaidō"))
 Npref <- nrow(win)
 win$ID  <-  1:Npref
 W_nb <- poly2nb(win, row.names =  win$ID)
@@ -78,8 +77,8 @@ nbInfo <- nb2WB(W_nb)
 # RiceRegion Based
 win$riceregion <- NA
 win$riceregion[which(win$name%in%c('Fukuoka','Saga','Nagasaki'))]  <- "I"
-win$riceregion[which(win$name%in%c('Oita','Miyazaki','Kagoshima','Kumamoto'))]  <- "II"
-win$riceregion[which(win$name%in%c('Ehime','Kochi')|win$region=='Chugoku')]  <- "III"
+win$riceregion[which(win$name%in%c('Ōita','Miyazaki','Kagoshima','Kumamoto'))]  <- "II"
+win$riceregion[which(win$name%in%c('Ehime','Kōchi')|win$region=='Chugoku')]  <- "III"
 win$riceregion[which(win$name%in%c('Kagawa','Tokushima')|win$region=='Kinki')]  <- 'IV'
 win$riceregion[which(win$name%in%c('Kanagawa')|win$region=='Chubu')]  <- "V"
 win$riceregion[which(win$name%in%c('Saitama','Gunma','Tokyo','Chiba','Tochigi','Ibaraki'))]  <- "VI"
