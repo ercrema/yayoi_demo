@@ -100,6 +100,7 @@ chain_output  <- parLapply(cl = cl, X = seeds, fun = runFun, d = d,constants = c
 stopCluster(cl)
 icar.samples <- coda::mcmc.list(chain_output)
 rhats.c14double750  <- coda::gelman.diag(icar.samples)
+ess.c14double750  <- coda::effectiveSize(icar.samples)
 icar.c14double750 <- do.call(rbind.data.frame,icar.samples)
 c14db750 <- c14db
-save(c14db750,rhats.c14double750,icar.c14double750,file=here('results','icar_c14doubleRes750.RData'))
+save(c14db750,ess.c14double750,rhats.c14double750,icar.c14double750,file=here('results','icar_c14doubleRes750.RData'))
