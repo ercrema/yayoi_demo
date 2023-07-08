@@ -4,8 +4,8 @@ This repository contains data and scripts used in the following paper:
 
 Crema, E. R., Carrignon, S., Shoda, S., & Stevens, C. J., & Shoda, S. (202X). Regional demographic responses to the arrival of rice farming in prehistoric Japan. 
 
-The repository is organised into four main directories: _data_, _analyses_, _results_, _figures_, and _src_.
-The _data_ folder contains all relevant radiocarbon and settlement data, _analyses_ contains core R scripts for executing all analyses and estimates, _results_ contains R image files of all outputs, _figures_ contains all figures for the manuscript and the supplementary materials, and _src_ contains additional custom utility R functions. 
+The repository is organised into five main directories: _data_, _analyses_, _results_, _figures_, _tables_, and _src_.
+The _data_ folder contains all relevant radiocarbon and settlement data, _analyses_ contains core R scripts for executing all analyses and estimates, _results_ contains R image files of all outputs, _figures_ and _tables_ contain all figures and tables for the manuscript and the supplementary materials as well as R scripts required to generate them, and _src_ contains additional custom utility R functions. 
 
 ## Analyses Summary
 
@@ -53,11 +53,59 @@ Absolute population estimates were calculated using a modified version of equati
  * `figures_esm.R`
  * `figure1.pdf` ~ `figure6.pdf`
  * `figureS1.pdf` ~ `figureS3.pdf`
- 
+
+### tables
+ * `tables_main.R`
+ * `tables_esm.R`
+ * `table1.csv`
+ * `tableS1.csv`
+ * `tableS2.csv`
+
 ### src
 * `dbscanID.R`
 
 ## R Session Info
+
+```
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+ [1] dbscan_1.1-11       spdep_1.2-8         spData_2.2.2        coda_0.19-4        
+ [5] sf_1.0-13           rnaturalearth_0.3.2 latex2exp_0.9.6     RColorBrewer_1.1-3 
+ [9] here_1.0.1          rcarbon_1.5.1       nimbleCarbon_0.2.4  nimble_1.0.1       
+[13] gridExtra_2.3       dplyr_1.1.2         ggplot2_3.4.2      
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.2.0       fastmap_1.1.1          spatstat.geom_3.2-2   
+ [4] pracma_2.4.2           spatstat.explore_3.2-1 digest_0.6.31         
+ [7] rpart_4.1.19           lifecycle_1.0.3        spatstat.data_3.0-1   
+[10] magrittr_2.0.3         compiler_4.3.0         rlang_1.1.1           
+[13] doSNOW_1.0.20          tools_4.3.0            igraph_1.5.0          
+[16] utf8_1.2.3             yaml_2.3.7             knitr_1.43            
+[19] sp_1.6-1               classInt_0.4-9         abind_1.4-5           
+[22] KernSmooth_2.23-20     withr_2.5.0            purrr_1.0.1           
+[25] numDeriv_2016.8-1.1    grid_4.3.0             polyclip_1.10-4       
+[28] fansi_1.0.4            e1071_1.7-13           colorspace_2.1-0      
+[31] progressr_0.13.0       scales_1.2.1           iterators_1.0.14      
+[34] spatstat.utils_3.0-3   spatstat_3.0-6         cli_3.6.1             
+[37] rmarkdown_2.21         generics_0.1.3         rstudioapi_0.14       
+[40] httr_1.4.6             DBI_1.1.3              proxy_0.4-27          
+[43] stringr_1.5.0          splines_4.3.0          spatstat.model_3.2-4  
+[46] s2_1.1.4               vctrs_0.6.3            boot_1.3-28.1         
+[49] Matrix_1.5-4           jsonlite_1.8.4         tensor_1.5            
+[52] elevatr_0.4.5          foreach_1.5.2          units_0.8-2           
+[55] snow_0.4-4             goftest_1.2-3          glue_1.6.2            
+[58] spatstat.random_3.1-5  codetools_0.2-19       stringi_1.7.12        
+[61] gtable_0.3.3           deldir_1.0-9           munsell_0.5.0         
+[64] tibble_3.2.1           pillar_1.9.0           htmltools_0.5.5       
+[67] R6_2.5.1               wk_0.7.3               rprojroot_2.0.3       
+[70] evaluate_0.21          lattice_0.21-8         class_7.3-21          
+[73] Rcpp_1.0.11            spatstat.linnet_3.1-1  nlme_3.1-162          
+[76] spatstat.sparse_3.0-2  mgcv_1.8-42            xfun_0.39             
+[79] pkgconfig_2.0.3 
+```
+
 
 ## Funding
 This research was funded by the ERC grant _Demography, Cultural Change, and the Diffusion of Rice and Millets during the Jomon-Yayoi transition in prehistoric Japan (ENCOUNTER)_ (Project N. 801953, PI: Enrico Crema) and by a Philip Leverhulme Prize (PLP-2019-304) in archaeology awarded to Enrico Crema.
