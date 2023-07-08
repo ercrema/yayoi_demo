@@ -23,8 +23,8 @@ params <- c(paste0('r_1_',as.roman(1:8)),paste0('r_2_',as.roman(1:8)),'tau_1','t
 table.S1  <- table.S2  <-  data.frame(params)
 
 # Mean Posteriors ----
-table.S1$mean <- apply(icar.c14double500,2,mean)
-table.S2$mean <- apply(icar.c14double500,2,mean)
+table.S1$mean <- apply(icar.c14double500,2,mean) |> round(3)
+table.S2$mean <- apply(icar.c14double500,2,mean) |> round(3)
 
 # HPDI ----
 table.S1$hpd <- apply(icar.c14double500,2,function(x){return(HPDinterval(as.mcmc(x),0.95))}) |> round(3) |> apply(2,paste,collapse=' ~ ')
