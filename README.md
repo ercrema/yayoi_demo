@@ -15,7 +15,7 @@ Settlement data were obtained from the [「縄文・弥生集落データベー�
 
 ### Bayesian Analyses of Radiocarbon Dates
 
-14C data were obtained from [radiocarbon database of the National Museum of Japanese History](https://www.rekihaku.ac.jp/up-cgi/login.pl?p=param/esrd_en/db_param). We primarily used the redacted version of the database described in [Kudo et al 2023](https://openarchaeologydata.metajnl.com/) but extracted specific fields from the original version to identify anthropogenic contexts. The file `data/data_prep_c14.R` contains pre-processing R scripts for generating the core dataset used in this paper, stored in the R image file `data/c14data.RData`. Bayesian analyses were carried out using the [nimbleCarbon](https://CRAN.R-project.org/package=nimbleCarbon) R package, which contains custom probability distributions and utility functions for the [NIMBLE](https://cran.r-project.org/web/packages/nimble/index.html) probabilistic programming language. The files `analyses/icar500.R` and `analyses/icar750.R` contains the R script for fitting the Bayesian models for the 500 and 750 yrs time-intervals. Posterior samples are stored in the R image files `results/icar_c14doubleRes500.RData` and `results/icar_c14doubleRes750.RData`. 
+14C data were obtained from [radiocarbon database of the National Museum of Japanese History](https://www.rekihaku.ac.jp/up-cgi/login.pl?p=param/esrd_en/db_param). We joined the cleaned and translated version of the database (`c14db_1.1.0.csv`, obtained [here]((https://www.rekihaku.ac.jp/up-cgi/login.pl?p=param/esrd_en/db_param)) to the full Japanese version of the database (`.xslx` files in `/data/rekihaku_downloads`, obtained [here](https://www.rekihaku.ac.jp/up-cgi/login.pl?p=param/esrd/db_param)) to extract relevant field for  identifying anthropogenic contexts. The file `data/data_prep_c14.R` contains pre-processing R scripts for generating the core dataset used in this paper, stored in the R image file `data/c14data.RData`. Bayesian analyses were carried out using the [nimbleCarbon](https://CRAN.R-project.org/package=nimbleCarbon) R package, which contains custom probability distributions and utility functions for the [NIMBLE](https://cran.r-project.org/web/packages/nimble/index.html) probabilistic programming language. The files `analyses/icar500.R` and `analyses/icar750.R` contains the R script for fitting the Bayesian models for the 500 and 750 yrs time-intervals. Posterior samples are stored in the R image files `results/icar_c14doubleRes500.RData` and `results/icar_c14doubleRes750.RData`. 
 
 
 ### Absolute Population Estimates
@@ -26,8 +26,6 @@ Absolute population estimates were calculated using a modified version of equati
 
 ### data
  * `c14data.RData`
- * `c14db_1.0.0.Rds`
- * `c14raw_1.0.0.Rds`
  * `data_prep_c14.R`
  * `data_prep_sites.R`
  * `data_summary.R`
@@ -36,6 +34,15 @@ Absolute population estimates were calculated using a modified version of equati
  * `prefecture_data.csv`
  * `sitedata.RData`
  * `site_raw.csv`
+
+#### /data/rekihaku_downloads
+ * `1200_100_T.xlsx`
+ * `2000_1201_T.xlsx`
+ * `3000_2001_T.xlsx`
+ * `5000_3001_T.xlsx`
+ * `c14db_1.1.0.csv`
+ * `binded.csv`
+ * `bindCSV.R`
    
 ### analyses
  * `icar500.R`
