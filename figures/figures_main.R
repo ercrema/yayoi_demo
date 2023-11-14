@@ -11,6 +11,14 @@ library(rcarbon)
 library(coda)
 
 # Figure 1 ----
+
+# Function for generating rectangular labels, from https://stackoverflow.com/a/31371497 
+recttext <- function(xl, yb, xr, yt, text, rectArgs = NULL, textArgs = NULL) {
+  center <- c(mean(c(xl, xr)), mean(c(yb, yt)))
+  do.call('rect', c(list(xleft = xl, ybottom = yb, xright = xr, ytop = yt), rectArgs))
+  do.call('text', c(list(x = center[1], y = center[2], labels = text), textArgs))
+}
+
 load(here('data','c14data.RData'))
 win  <- ne_countries(scale=10,returnclass='sf')
 japan <- ne_states(country = "japan",returnclass='sf') |> subset(!name_vi %in% c("Okinawa","Hokkaidō"))
@@ -33,11 +41,19 @@ plot(win,xlim=c(127,143),ylim=c(31,43),col='white',add=TRUE,lwd=0.5)
 plot(japan,col=adjustcolor(cols,alpha.f = 0.9),border='grey77',add=TRUE,lwd=0.2) 
 plot(win,xlim=c(127,143),ylim=c(31,43),col=NA,add=TRUE,lwd=0.5)
 plot(c14sites,pch=20,cex=0.2,add=TRUE)
-text(x=c(129.99,132.12,131.83,134.91,136.32,141.76,142.58,142.25),y=c(34.24,31.75,35.95,36.42,37.94,35.42,38.54,41.34),labels=as.roman(1:8),cex=1)
+text(x=c(129.99,132.12,131.83,134.91,136.32,141.76,142.58,142.25),y=c(34.3,32.3,35.95,36.42,37.94,35.42,38.54,41.34),labels=as.roman(1:8),cex=1)
 axis(1,at=seq(129,143,2),tck=-0.01,padj=-0.8)
 axis(2,at=seq(30,42,2),tck=-0.01,padj=0.8)
 mtext(side=1,line =1.4,'Longitude')
 mtext(side=2,line=1.4,'Latitude')
+recttext(xl=126.5,xr=130.5,yb=33,yt=34,text=c('1039 BCE \n (1251-872 BCE)'),rectArgs=list(col=rgb(1,1,1,0.5),border=NA),textArgs=list(cex=0.7))
+recttext(xl=131.6,xr=135.6,yb=31,yt=32,text=c(' 570 BCE \n (735-430 BCE)'),rectArgs=list(col=rgb(1,1,1,0.5),border=NA),textArgs=list(cex=0.7))
+recttext(xl=130,xr=134,yb=36.5,yt=37.5,text=c(' 910 BCE \n (1061-779 BCE)'),rectArgs=list(col=rgb(1,1,1,0.5),border=NA),textArgs=list(cex=0.7))
+recttext(xl=135.3,xr=139.3,yb=32.2,yt=33.2,text=c(' 824 BCE \n (946-703 BCE)'),rectArgs=list(col=rgb(1,1,1,0.5),border=NA),textArgs=list(cex=0.7))
+recttext(xl=134,xr=138,yb=38.2,yt=39.2,text=c(' 648 BCE \n (754-560 BCE)'),rectArgs=list(col=rgb(1,1,1,0.5),border=NA),textArgs=list(cex=0.7))
+recttext(xl=139.4,xr=143.4,yb=33.6,yt=34.6,text=c(' 271 BCE \n (471-124 BCE)'),rectArgs=list(col=rgb(1,1,1,0.5),border=NA),textArgs=list(cex=0.7))
+recttext(xl=141.2,xr=143.4,yb=36.5,yt=38,text=c(' 152 BCE \n (434 BCE \n -42 CE)'),rectArgs=list(col=rgb(1,1,1,0.5),border=NA),textArgs=list(cex=0.7))
+recttext(xl=136,xr=140,yb=40.4,yt=41.4,text=c(' 428 BCE \n (709-203 BCE)'),rectArgs=list(col=rgb(1,1,1,0.5),border=NA),textArgs=list(cex=0.7))
 box()
 dev.off()
 
