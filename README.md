@@ -2,7 +2,7 @@
 
 This repository contains data and scripts used in the following paper:
 
-Crema, E. R., Carrignon, S., Shoda, S., & Stevens, C. J., & Shoda, S. (In press). Regional variations in the demographic response to the arrival of rice farming in prehistoric Japan._Antiquity_.
+Crema, E. R., Carrignon, S., Shoda, S., & Stevens, C. J., & Shoda, S. (In press). Regional variations in the demographic response to the arrival of rice farming in prehistoric Japan. _Antiquity_.
 
 The repository is organised into five main directories: _data_, _analyses_, _results_, _figures_, _tables_, and _src_.
 The _data_ folder contains all relevant radiocarbon and settlement data, _analyses_ contains core R scripts for executing all analyses and estimates, _results_ contains R image files of all outputs, _figures_ and _tables_ contain all figures and tables for the manuscript and the supplementary materials as well as R scripts required to generate them, and _src_ contains additional custom utility R functions. 
