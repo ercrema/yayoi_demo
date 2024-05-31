@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/370637019.svg)](https://zenodo.org/doi/10.5281/zenodo.11398533)
+
 # Data and R scripts for the paper 'Regional variations in the demographic response to the arrival of rice farming in prehistoric Japan'
 
 This repository contains data and scripts used in the following paper:
